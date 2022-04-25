@@ -15,7 +15,7 @@ type DynamoConnection interface {
 	// GetItem(*dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error)
 	// UpdateItem(*dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error)
 	// DeleteItem(*dynamodb.DeleteItemInput) (*dynamodb.DeleteItemOutput, error)
-	// Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
+	Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
 	// CreateTable(*dynamodb.CreateTableInput) (*dynamodb.CreateTableOutput, error)
 }
 
