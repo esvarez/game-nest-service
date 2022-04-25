@@ -13,6 +13,13 @@ type Configuration struct {
 	AppName  *string `mapstructure:"app_name" validate:"required"`
 	Env      *string `mapstructure:"environment" validate:"required"`
 	LogLevel *string `mapstructure:"log_level" validate:"required"`
+	AWS      *struct {
+		Region *string `mapstructure:"region" validate:"required"`
+	} `mapstructure:"aws" validate:"required"`
+	DynamoDB *struct {
+		Endpoint *string `mapstructure:"endpoint" validate:"required"`
+		Table    *string `mapstructure:"table" validate:"required"`
+	} `mapstructure:"dynamodb" validate:"required"`
 }
 
 func LoadConfiguration(path string, v *validator.Validate) *Configuration {

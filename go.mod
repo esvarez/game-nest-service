@@ -3,6 +3,7 @@ module github.com/esvarez/game-nest-service
 go 1.18
 
 require (
+	github.com/aws/aws-sdk-go v1.43.45
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
@@ -13,6 +14,7 @@ require (
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
