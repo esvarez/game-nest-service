@@ -8,7 +8,7 @@ type Reader interface {
 }
 
 type Writer interface {
-	Set(key, value *entity.Game) error
+	Set(key string, value *entity.Game) error
 	Delete(key string) error
 }
 

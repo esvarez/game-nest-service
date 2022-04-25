@@ -1,7 +1,7 @@
 package entity
 
 type Game struct {
-	ID          string
+	PK          string
 	SK          string
 	MinPlayers  int8
 	MaxPlayers  int8

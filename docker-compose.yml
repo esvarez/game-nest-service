@@ -2,7 +2,7 @@ version: "3"
 services:
   localstack:
     image: localstack/localstack:latest
-    container_name: db_cuervo
+    container_name: game-nest-aws
     ports:
       - '4563-4599:4563-4599'
       - '${PORT_WEB_UI-8080}:${PORT_WEB_UI-8080}'
