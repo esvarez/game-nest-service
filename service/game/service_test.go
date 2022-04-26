@@ -1,15 +1,15 @@
 package game
 
 import (
-	"github.com/esvarez/game-nest-service/entity"
-	"github.com/stretchr/testify/mock"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/esvarez/game-nest-service/dto"
+	"github.com/esvarez/game-nest-service/entity"
 	"github.com/esvarez/game-nest-service/service/game/mocks"
 )
 
@@ -124,6 +124,64 @@ func TestService_Get(t *testing.T) {
 			games, err := svc.GetAll()
 			assert.ErrorIs(t, err, tc.expectedError)
 			assert.Equal(t, games, tc.gamesExpected)
+		})
+	}
+}
+
+func TestService_Find(t *testing.T) {
+	tests := map[string]struct {
+		gameExpected  *entity.Game
+		expectedError error
+		partitionKey  string
+		mockSetup     func(repo *mocks.Repository)
+	}{
+		"returns game": {
+			gameExpected: &entity.Game{
+				PK:          "1",
+				SK:          "Catan",
+				MinPlayers:  3,
+				MaxPlayers:  4,
+				Description: "",
+				Duration:    120,
+			},
+			partitionKey: "Catan",
+			mockSetup: func(repo *mocks.Repository) {
+				repo.On("Find", mock.Anything).Return(&entity.Game{
+					PK:          "1",
+					SK:          "Catan",
+					MinPlayers:  3,
+					MaxPlayers:  4,
+					Description: "",
+					Duration:    120,
+				}, nil)
+			},
+		},
+		"game not found": {
+			expectedError: entity.ErrItemNotFound,
+			partitionKey:  "not a game",
+			mockSetup: func(repo *mocks.Repository) {
+				repo.On("Find", mock.Anything).Return(nil, entity.ErrItemNotFound)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var (
+				repo = &mocks.Repository{}
+				l    = logrus.New()
+				v    = validator.New()
+				svc  = NewService(repo, l, v)
+			)
+			l.SetLevel(logrus.DebugLevel)
+
+			if tc.mockSetup != nil {
+				tc.mockSetup(repo)
+			}
+
+			game, err := svc.Find(tc.partitionKey)
+			assert.ErrorIs(t, err, tc.expectedError)
+			assert.Equal(t, game, tc.gameExpected)
 		})
 	}
 }

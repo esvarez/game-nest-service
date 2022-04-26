@@ -6,13 +6,14 @@ import (
 )
 
 type Reader interface {
-	// Find(key string) (*entity.Game, error)
+	Find(key string) (*entity.Game, error)
 	GetAll() ([]*entity.Game, error)
 }
 
 type Writer interface {
 	Set(item *entity.Game) error
-	// Delete(key string) error
+	Update(item *entity.Game) error
+	Delete(key string) error
 }
 
 type Repository interface {
@@ -23,7 +24,7 @@ type Repository interface {
 type UseCase interface {
 	Save(item *dto.Game) error
 	GetAll() ([]*entity.Game, error)
-	// Find(key string) (*entity.Game, error)
-	// Update(key, value *entity.Game) error
+	Find(key string) (*entity.Game, error)
+	Update(key, value *entity.Game) error
 	// Delete(key string) error
 }

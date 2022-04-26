@@ -1,6 +1,9 @@
 package storage
 
 import (
+	"fmt"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/esvarez/game-nest-service/entity"
 	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -10,18 +13,22 @@ import (
 )
 
 type DynamoConnection interface {
-	// ListTables(*dynamodb.ListTablesInput) (*dynamodb.ListTablesOutput, error)
-	PutItem(*dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
-	// GetItem(*dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error)
-	// UpdateItem(*dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error)
-	// DeleteItem(*dynamodb.DeleteItemInput) (*dynamodb.DeleteItemOutput, error)
 	Query(input *dynamodb.QueryInput) (*dynamodb.QueryOutput, error)
+	GetItem(*dynamodb.GetItemInput) (*dynamodb.GetItemOutput, error)
+	PutItem(*dynamodb.PutItemInput) (*dynamodb.PutItemOutput, error)
+	UpdateItem(*dynamodb.UpdateItemInput) (*dynamodb.UpdateItemOutput, error)
+	DeleteItem(*dynamodb.DeleteItemInput) (*dynamodb.DeleteItemOutput, error)
+	// ListTables(*dynamodb.ListTablesInput) (*dynamodb.ListTablesOutput, error)
 	// CreateTable(*dynamodb.CreateTableInput) (*dynamodb.CreateTableOutput, error)
 }
 
 type DynamoClient struct {
 	DB    DynamoConnection
 	Table string
+}
+
+type DynamoItem interface {
+	*entity.Game
 }
 
 func CreateDynamoClient(conf *config.Configuration) *DynamoClient {
@@ -46,4 +53,21 @@ func connectToDynamo(conf *config.Configuration) *dynamodb.DynamoDB {
 		log.Fatal("service unavailable", err)
 	}
 	return db
+}
+
+func putItem[V DynamoItem](client *DynamoClient, item V) error {
+	av, err := dynamodbattribute.MarshalMap(item)
+
+	if err != nil {
+		return fmt.Errorf("%v: error marshalling game entity %w", err, entity.ErrEntityMarshal)
+	}
+
+	_, err = client.DB.PutItem(&dynamodb.PutItemInput{
+		Item:      av,
+		TableName: aws.String(client.Table),
+	})
+	if err != nil {
+		return fmt.Errorf("%v: error putting item %w", err, entity.ErrDynamoDB)
+	}
+	return nil
 }

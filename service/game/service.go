@@ -38,3 +38,11 @@ func (s *Service) Save(data *dto.Game) error {
 func (s *Service) GetAll() ([]*entity.Game, error) {
 	return s.repo.GetAll()
 }
+
+func (s *Service) Find(pk string) (*entity.Game, error) {
+	return s.repo.Find(pk)
+}
+
+func (s *Service) Update(data *dto.Game) error {
+	return nil
+}

@@ -15,22 +15,22 @@ type Repository struct {
 	mock.Mock
 }
 
-// Get provides a mock function with given fields:
-func (_m *Repository) Get() ([]*entity.Game, error) {
-	ret := _m.Called()
+// Find provides a mock function with given fields: key
+func (_m *Repository) Find(key string) (*entity.Game, error) {
+	ret := _m.Called(key)
 
-	var r0 []*entity.Game
-	if rf, ok := ret.Get(0).(func() []*entity.Game); ok {
-		r0 = rf()
+	var r0 *entity.Game
+	if rf, ok := ret.Get(0).(func(string) *entity.Game); ok {
+		r0 = rf(key)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*entity.Game)
+			r0 = ret.Get(0).(*entity.Game)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(key)
 	} else {
 		r1 = ret.Error(1)
 	}
