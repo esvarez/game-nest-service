@@ -15,6 +15,20 @@ type Repository struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: key
+func (_m *Repository) Delete(key string) error {
+	ret := _m.Called(key)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(key)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Find provides a mock function with given fields: key
 func (_m *Repository) Find(key string) (*entity.Game, error) {
 	ret := _m.Called(key)
@@ -63,6 +77,20 @@ func (_m *Repository) GetAll() ([]*entity.Game, error) {
 
 // Set provides a mock function with given fields: item
 func (_m *Repository) Set(item *entity.Game) error {
+	ret := _m.Called(item)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*entity.Game) error); ok {
+		r0 = rf(item)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// Update provides a mock function with given fields: item
+func (_m *Repository) Update(item *entity.Game) error {
 	ret := _m.Called(item)
 
 	var r0 error

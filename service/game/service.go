@@ -46,3 +46,7 @@ func (s *Service) Find(pk string) (*entity.Game, error) {
 func (s *Service) Update(data *dto.Game) error {
 	return nil
 }
+
+func (s *Service) Delete(key string) error {
+	return nil
+}

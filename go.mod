@@ -6,6 +6,7 @@ require (
 	github.com/aws/aws-sdk-go v1.43.45
 	github.com/go-playground/validator/v10 v10.10.1
 	github.com/google/uuid v1.1.2
+	github.com/gorilla/mux v1.8.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.11.0
 	github.com/stretchr/testify v1.7.1

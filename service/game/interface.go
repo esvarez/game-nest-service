@@ -26,5 +26,5 @@ type UseCase interface {
 	GetAll() ([]*entity.Game, error)
 	Find(key string) (*entity.Game, error)
 	Update(key, value *entity.Game) error
-	// Delete(key string) error
+	Delete(key string) error
 }
