@@ -9,6 +9,8 @@ import (
 type Game struct {
 	PK          string `dynamodbav:"PK"`
 	SK          string `dynamodbav:"SK"`
+	Name        string `dynamodbav:"name"`
+	Url         string `dynamodbav:"url"`
 	MinPlayers  int8   `dynamodbav:"MinPlayers"`
 	MaxPlayers  int8   `dynamodbav:"MaxPlayers"`
 	Description string `dynamodbav:"Description"`
@@ -19,7 +21,8 @@ type Game struct {
 
 func (g *Game) Create(data *dto.Game) {
 	g.PK = NewID().String()
-	g.SK = data.Name
+	g.Name = data.Name
+	g.Url = strings.Replace(strings.Trim(strings.ToLower(data.Name), " "), " ", "-", -1)
 	g.MinPlayers = data.MinPlayers
 	g.MaxPlayers = data.MaxPlayers
 	g.Description = data.Description

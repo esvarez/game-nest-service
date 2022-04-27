@@ -1,0 +1,9 @@
+http_port: 4200
+app_name: fuego-de-quasar
+environment: dev
+log_level: debug
+aws:
+  region: us-east-1
+dynamodb:
+  endpoint: http://localhost:4566
+  table: game-nest

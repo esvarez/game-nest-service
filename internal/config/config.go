@@ -24,7 +24,7 @@ type Configuration struct {
 
 func LoadConfiguration(path string, v *validator.Validate) *Configuration {
 	file := viper.New()
-	file.SetConfigName(path)
+	file.SetConfigFile(path)
 	var config Configuration
 
 	if err := file.ReadInConfig(); err != nil {

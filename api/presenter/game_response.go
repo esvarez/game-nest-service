@@ -13,7 +13,7 @@ type GameResponse struct {
 
 func (g *GameResponse) BuildResponse(game *entity.Game) {
 	g.ID = game.PK
-	g.Name = game.SK
+	g.Name = game.Name
 	g.MinPlayers = game.MinPlayers
 	g.MaxPlayers = game.MaxPlayers
 	g.Description = game.Description

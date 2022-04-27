@@ -31,6 +31,10 @@ type DynamoItem interface {
 	*entity.Game
 }
 
+const (
+	SKIndex = "SKIndex"
+)
+
 func CreateDynamoClient(conf *config.Configuration) *DynamoClient {
 	return &DynamoClient{
 		DB:    connectToDynamo(conf),

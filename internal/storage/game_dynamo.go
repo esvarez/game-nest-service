@@ -18,11 +18,11 @@ type GameClient struct {
 
 const (
 	pkGame = "game#"
-	skGame = "name#"
+	skGame = "data"
 )
 
-func NewGameClient(client *DynamoClient) *GameClient {
-	return &GameClient{client: client}
+func NewGameClient(client *DynamoClient, l *logrus.Logger) *GameClient {
+	return &GameClient{client: client, log: l}
 }
 
 func (g *GameClient) Set(game *entity.Game) error {
@@ -33,20 +33,21 @@ func (g *GameClient) Set(game *entity.Game) error {
 
 func (g *GameClient) GetAll() ([]*entity.Game, error) {
 	client := g.client
-	filt := expression.Name("PK").BeginsWith(pkGame).
-		And(expression.Name("SK").BeginsWith(skGame))
+	keys := expression.Key("SK").Equal(expression.Value(skGame))
 	// TODO: add pagination
 	// TODO Move to a common function
-	expr, err := expression.NewBuilder().WithFilter(filt).Build()
+
+	expr, err := expression.NewBuilder().WithKeyCondition(keys).Build()
 	if err != nil {
 		g.log.WithError(err).Error("error building expression")
-		return nil, fmt.Errorf("%v: error building expression %w", err, entity.ErrAWSConfig)
+		return nil, fmt.Errorf("%v: error building expression: %w", err, entity.ErrAWSConfig)
 	}
-
 	result, err := client.DB.Query(&dynamodb.QueryInput{
-		TableName:                aws.String(client.Table),
-		KeyConditionExpression:   expr.KeyCondition(),
-		ExpressionAttributeNames: expr.Names(),
+		TableName:                 aws.String(client.Table),
+		IndexName:                 aws.String(SKIndex),
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
 	})
 	if err != nil {
 		g.log.WithError(err).Error("error querying dynamo")

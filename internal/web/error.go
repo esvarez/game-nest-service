@@ -11,6 +11,19 @@ type AppError struct {
 	Message    string `json:"message"`
 }
 
+var (
+	ErrInvalidJSON    = AppError{StatusCode: http.StatusBadRequest, Type: "invalid_json", Message: "Invalid or malformed JSON"}
+	ErrInternalServer = AppError{StatusCode: http.StatusInternalServerError, Type: "internal_server_error", Message: "System fail internally"}
+)
+
+func InvalidBody(err error) AppError {
+	return AppError{
+		StatusCode: http.StatusBadRequest,
+		Type:       "invalid_entity",
+		Message:    err.Error(),
+	}
+}
+
 func (e AppError) Send(w http.ResponseWriter) error {
 	statusCode := e.StatusCode
 	if statusCode == 0 {
