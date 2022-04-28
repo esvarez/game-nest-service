@@ -27,6 +27,10 @@ func NewGameHandler(s *game.Service, l *logrus.Logger) *GameHandler {
 	}
 }
 
+const (
+	gameName = "game_name"
+)
+
 func (g *GameHandler) getGames() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		games, err := g.GameService.GetAll()
@@ -44,6 +48,29 @@ func (g *GameHandler) getGames() http.Handler {
 			response[i] = g
 		}
 
+		web.Success(response, http.StatusOK).Send(w)
+	})
+}
+
+func (g *GameHandler) findGameByName() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		params := mux.Vars(r)
+
+		item, err := g.GameService.Find(params[gameName])
+		if err != nil {
+			var status web.AppError
+			switch {
+			case errors.Is(err, entity.ErrItemNotFound):
+				status = web.ErrResourceNotFound
+			default:
+				status = web.ErrInternalServer
+			}
+			status.Send(w)
+			return
+		}
+
+		response := &presenter.GameResponse{}
+		response.BuildResponse(item)
 		web.Success(response, http.StatusOK).Send(w)
 	})
 }
@@ -81,6 +108,8 @@ func MakeGameHandler(router *mux.Router, handler *GameHandler) {
 	router = router.PathPrefix("/game").Subrouter()
 
 	router.Handle("", handler.getGames()).
+		Methods("GET")
+	router.Handle("/{game_name}", handler.findGameByName()).
 		Methods("GET")
 	router.Handle("", handler.createGame()).
 		Methods("POST")

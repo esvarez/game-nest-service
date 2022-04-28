@@ -19,6 +19,8 @@ type GameClient struct {
 const (
 	pkGame = "game#"
 	skGame = "data"
+
+	userRecordName = "user"
 )
 
 func NewGameClient(client *DynamoClient, l *logrus.Logger) *GameClient {
