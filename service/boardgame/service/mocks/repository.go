@@ -53,6 +53,29 @@ func (_m *Repository) Find(id string) (*entity.BoardGame, error) {
 	return r0, r1
 }
 
+// FindByUrl provides a mock function with given fields: url
+func (_m *Repository) FindByUrl(url string) (*entity.BoardGame, error) {
+	ret := _m.Called(url)
+
+	var r0 *entity.BoardGame
+	if rf, ok := ret.Get(0).(func(string) *entity.BoardGame); ok {
+		r0 = rf(url)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*entity.BoardGame)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(url)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetAll provides a mock function with given fields:
 func (_m *Repository) GetAll() ([]*entity.BoardGame, error) {
 	ret := _m.Called()

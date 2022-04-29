@@ -20,11 +20,6 @@ type BoardGameStorage struct {
 	now  func() int64
 }
 
-const (
-	pkGame = "game#"
-	skGame = "data"
-)
-
 func NewBoardGameStorage(l *logrus.Logger, s *Storage) *BoardGameStorage {
 	return &BoardGameStorage{
 		repo: s,

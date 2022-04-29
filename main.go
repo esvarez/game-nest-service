@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 

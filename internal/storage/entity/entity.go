@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+	"github.com/esvarez/game-nest-service/service/user/entity"
 )
 
 func newUserRecord(user *entity.User) userRecord {
