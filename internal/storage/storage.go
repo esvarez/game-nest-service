@@ -13,7 +13,7 @@ import (
 )
 
 type Record interface {
-	storage.BoardGameRecord
+	storage.BoardGameRecord | storage.UserRecord
 }
 
 const (
@@ -124,9 +124,9 @@ func getItem[T Record](pk, sk, table string, client *dynamodb.DynamoDB) (*T, err
 		return nil, fmt.Errorf("item not found %w", errs.ErrItemNotFound)
 	}
 
-	game := &T{}
-	if err = dynamodbattribute.UnmarshalMap(result.Item, game); err != nil {
+	record := new(T)
+	if err = dynamodbattribute.UnmarshalMap(result.Item, record); err != nil {
 		return nil, fmt.Errorf("%v: error unmarshalling item entity %w", err, errs.ErrEntityUnmarshal)
 	}
-	return game, nil
+	return record, nil
 }
