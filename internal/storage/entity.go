@@ -13,6 +13,20 @@ const (
 	userRecordName      = "user"
 )
 
+func newBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
+	return &entity.BoardGame{
+		ID:          bg.ID[strings.Index(bg.ID, "#")+1:],
+		Name:        bg.Name,
+		Url:         bg.Url,
+		MinPlayers:  bg.MinPlayers,
+		MaxPlayers:  bg.MaxPlayers,
+		Description: bg.Description,
+		Duration:    bg.Duration,
+		UpdatedAt:   bg.UpdatedAt,
+		CreatedAt:   bg.CreatedAt,
+	}
+}
+
 func newBoardGameRecord(b *dto.BoardGame) BoardGameRecord {
 	return BoardGameRecord{
 		record: record{

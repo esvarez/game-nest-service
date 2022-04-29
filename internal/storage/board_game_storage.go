@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/sirupsen/logrus"
@@ -44,82 +42,46 @@ func (g *BoardGameStorage) Set(item *dto.BoardGame) error {
 }
 
 func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
-	client := g.repo.Client
-	keys := expression.Key("SK").Equal(expression.Value(boardGameRecordName))
+	key := expression.Key("SK").Equal(expression.Value(boardGameRecordName))
 
-	// TODO: add pagination
-	// TODO Move to a common function
-
-	expr, err := expression.NewBuilder().WithKeyCondition(keys).Build()
+	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
 	if err != nil {
 		g.log.WithError(err).Error("error building expression")
 		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
 	}
-	result, err := client.Query(&dynamodb.QueryInput{
-		TableName:                 aws.String(g.repo.TableName),
-		IndexName:                 aws.String(SKIndex),
-		KeyConditionExpression:    expr.KeyCondition(),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-	})
-	if err != nil {
-		g.log.WithError(err).Error("error querying dynamo")
-		return nil, fmt.Errorf("%v: error querying dynamo %w", err, errs.ErrDynamoDB)
-	}
+
+	result, err := g.repo.QueryIndex(expr, SKIndex)
 
 	games := make([]*entity.BoardGame, len(result.Items))
 	if len(games) == 0 {
-		g.log.Info("No games found")
+		g.log.Warn("No games found")
 		return games, nil
 	}
 
 	for i, item := range result.Items {
-		game := &entity.BoardGame{}
-		if err = dynamodbattribute.UnmarshalMap(item, game); err != nil {
+		bg := &BoardGameRecord{}
+		if err = dynamodbattribute.UnmarshalMap(item, bg); err != nil {
 			g.log.WithError(err).Error("error unmarshalling game entity")
 			return nil, fmt.Errorf("%v: error unmarshalling game entity %w", err, errs.ErrEntityUnmarshal)
 		}
-		// game.FormatKeys()
-		games[i] = game
+		games[i] = newBoardGameFromRecord(bg)
 	}
 	return games, nil
 }
 
-/*
-func (g *GameClient) Find(key string) (*entity2.Game, error) {
-	key = pkGame + key
-	sk := skGame + key
-	client := g.repo.Client
+func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
+	pk := boardGameRecordName + "#" + id
+	sk := boardGameRecordName
 
-	// TODO move to a common function
-	result, err := client.GetItem(&dynamodb.GetItemInput{
-		// TableName: aws.String(g.Table),
-		Key: map[string]*dynamodb.AttributeValue{
-			"PK": {
-				S: aws.String(key),
-			},
-			"SK": {
-				S: aws.String(sk),
-			},
-		},
-	})
+	record, err := getItem[BoardGameRecord](pk, sk, g.repo.TableName, g.repo.Client)
 	if err != nil {
-		g.log.WithError(err).Error("error getting game item")
-		return nil, fmt.Errorf("%v: error getting item %w", err, entity.ErrDynamoDB)
+		g.log.WithError(err).Error("error board game")
+		return nil, fmt.Errorf("error getting board game: %w", err)
 	}
-	if len(result.Item) == 0 {
-		g.log.Info("No game found")
-		return nil, fmt.Errorf("no game found %w", entity.ErrItemNotFound)
-	}
-
-	game := &entity2.Game{}
-	if err = dynamodbattribute.UnmarshalMap(result.Item, game); err != nil {
-		g.log.WithError(err).Error("error unmarshalling game entity")
-		return nil, fmt.Errorf("%v: error unmarshalling game entity %w", err, entity.ErrEntityUnmarshal)
-	}
-	return game, nil
+	return newBoardGameFromRecord(record), nil
 }
 
+/*
 func (g *GameClient) Update(game *entity2.Game) error {
 	game.PK = pkGame + game.PK
 	game.SK = skGame + game.SK

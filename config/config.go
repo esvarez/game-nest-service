@@ -9,17 +9,21 @@ import (
 )
 
 type Configuration struct {
-	HTTPPort *string `mapstructure:"http_port" validate:"required"`
-	AppName  *string `mapstructure:"app_name" validate:"required"`
-	Env      *string `mapstructure:"environment" validate:"required"`
-	LogLevel *string `mapstructure:"log_level" validate:"required"`
-	AWS      *struct {
-		Region *string `mapstructure:"region" validate:"required"`
-	} `mapstructure:"aws" validate:"required"`
-	DynamoDB *struct {
-		Endpoint *string `mapstructure:"endpoint" validate:"required"`
-		Table    *string `mapstructure:"table" validate:"required"`
-	} `mapstructure:"dynamodb" validate:"required"`
+	HTTPPort *string   `mapstructure:"http_port" validate:"required"`
+	AppName  *string   `mapstructure:"app_name" validate:"required"`
+	Env      *string   `mapstructure:"environment" validate:"required"`
+	LogLevel *string   `mapstructure:"log_level" validate:"required"`
+	AWS      *AWS      `mapstructure:"aws" validate:"required"`
+	DynamoDB *DynamoDB `mapstructure:"dynamodb" validate:"required"`
+}
+
+type AWS struct {
+	Region *string `mapstructure:"region" validate:"required"`
+}
+
+type DynamoDB struct {
+	Endpoint *string `mapstructure:"endpoint" validate:"required"`
+	Table    *string `mapstructure:"table" validate:"required"`
 }
 
 func LoadConfiguration(path string, v *validator.Validate) *Configuration {

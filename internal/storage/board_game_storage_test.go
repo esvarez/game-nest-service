@@ -1,9 +1,11 @@
 package storage
 
 import (
+	"testing"
+
+	"github.com/esvarez/game-nest-service/config"
 	"github.com/esvarez/game-nest-service/internal/logger"
 	"github.com/esvarez/game-nest-service/service/boardgame/dto"
-	"testing"
 )
 
 func TestStorage_SetIntegration(t *testing.T) {
@@ -61,10 +63,70 @@ func TestStorage_GetAllIntegration(t *testing.T) {
 	}
 }
 
+func TestStorage_FindIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+	name := createLocalTable(t)
+	defer deleteLocalTable(t, name)
+	bgs := getBGStorage(name)
+	bg := &dto.BoardGame{
+		Name:       "Scythe",
+		MinPlayers: 1,
+		MaxPlayers: 5,
+		Duration:   120,
+	}
+	if err := bgs.Set(bg); err != nil {
+		t.Errorf("failed to create boardgame: %v", err)
+	}
+	bGames, err := bgs.GetAll()
+	if err != nil {
+		t.Errorf("failed to get all boardgames: %v", err)
+	}
+
+	id := bGames[0].ID
+
+	bg = &dto.BoardGame{
+		Name:       "Catan",
+		MinPlayers: 3,
+		MaxPlayers: 4,
+		Duration:   90,
+	}
+	if err = bgs.Set(bg); err != nil {
+		t.Errorf("failed to create boardgame: %v", err)
+	}
+
+	game, err := bgs.Find(id)
+	if err != nil {
+		t.Errorf("failed to find boardgame: %v", err)
+	}
+	if game.ID != id {
+		t.Errorf("expected id %s, got %s", id, game.ID)
+	}
+	if game.Name != "Scythe" {
+		t.Errorf("expected name %s, got %s", "Scythe", game.Name)
+	}
+	if game.MinPlayers != 1 {
+		t.Errorf("expected min players %d, got %d", 1, game.MinPlayers)
+	}
+	if game.MaxPlayers != 5 {
+		t.Errorf("expected max players %d, got %d", 5, game.MaxPlayers)
+	}
+}
+
 func getBGStorage(name string) *BoardGameStorage {
-	conf := getConfigFile()
-	conf.DynamoDB.Table = &name
 	var (
+		ep   = "http://localhost:4566"
+		r    = "us-east-1"
+		ll   = "DEBUG"
+		conf = &config.Configuration{
+			AWS: &config.AWS{Region: &r},
+			DynamoDB: &config.DynamoDB{
+				Endpoint: &ep,
+				Table:    &name,
+			},
+			LogLevel: &ll,
+		}
 		client = NewDynamoClient(conf)
 		l      = logger.CreateLogger(conf)
 		stor   = NewStorage(*conf.DynamoDB.Table, client)
