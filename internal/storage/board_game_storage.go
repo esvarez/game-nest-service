@@ -2,7 +2,6 @@ package storage
 
 import (
 	"fmt"
-	"github.com/esvarez/game-nest-service/internal/storage/entity"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -10,6 +9,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	errs "github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/storage/entity"
 	"github.com/esvarez/game-nest-service/service/boardgame/dto"
 	"github.com/esvarez/game-nest-service/service/boardgame/entity"
 )
@@ -36,14 +36,14 @@ func NewBoardGameStorage(l *logrus.Logger, s *Storage) *BoardGameStorage {
 }
 
 func (g *BoardGameStorage) Set(item *dto.BoardGame) error {
-	bg := newBoardGameRecord(item)
+	bg := storage.NewBoardGameRecord(item)
 	bg.CreatedAt = g.now()
 	bg.UpdatedAt = g.now()
 	return g.repo.PutItem(bg)
 }
 
 func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
-	key := expression.Key("SK").Equal(expression.Value(storage.boardGameRecordName))
+	key := expression.Key("SK").Equal(expression.Value(storage.BoardGameRecordName))
 
 	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
 	if err != nil {
@@ -60,31 +60,31 @@ func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 	}
 
 	for i, item := range result.Items {
-		bg := &BoardGameRecord{}
+		bg := &storage.BoardGameRecord{}
 		if err = dynamodbattribute.UnmarshalMap(item, bg); err != nil {
 			g.log.WithError(err).Error("error unmarshalling game entity")
 			return nil, fmt.Errorf("%v: error unmarshalling game entity %w", err, errs.ErrEntityUnmarshal)
 		}
-		games[i] = newBoardGameFromRecord(bg)
+		games[i] = storage.NewBoardGameFromRecord(bg)
 	}
 	return games, nil
 }
 
 func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
-	pk := storage.boardGameRecordName + "#" + id
-	sk := storage.boardGameRecordName
+	pk := storage.BoardGameRecordName + "#" + id
+	sk := storage.BoardGameRecordName
 
-	record, err := getItem[BoardGameRecord](pk, sk, g.repo.TableName, g.repo.Client)
+	record, err := getItem[storage.BoardGameRecord](pk, sk, g.repo.TableName, g.repo.Client)
 	if err != nil {
 		g.log.WithError(err).Error("error board game")
 		return nil, fmt.Errorf("error getting board game: %w", err)
 	}
-	return newBoardGameFromRecord(record), nil
+	return storage.NewBoardGameFromRecord(record), nil
 }
 
 func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
-	pk := storage.boardGameRecordName + "#" + id
-	sk := storage.boardGameRecordName
+	pk := storage.BoardGameRecordName + "#" + id
+	sk := storage.BoardGameRecordName
 
 	update := expression.Set(expression.Name("Name"), expression.Value(game.Name)).
 		Set(expression.Name("MinPlayers"), expression.Value(game.MinPlayers)).
@@ -102,8 +102,8 @@ func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
 }
 
 func (g *BoardGameStorage) Delete(id string) error {
-	pk := storage.boardGameRecordName + "#" + id
-	sk := storage.boardGameRecordName
+	pk := storage.BoardGameRecordName + "#" + id
+	sk := storage.BoardGameRecordName
 	f := expression.Name("PK").Equal(expression.Value(pk)).
 		And(expression.Name("SK").Equal(expression.Value(sk)))
 	expr, err := expression.NewBuilder().WithCondition(f).Build()

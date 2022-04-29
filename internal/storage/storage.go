@@ -9,10 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
 	"github.com/esvarez/game-nest-service/internal/entity"
+	storage "github.com/esvarez/game-nest-service/internal/storage/entity"
 )
 
 type Record interface {
-	BoardGameRecord
+	storage.BoardGameRecord
 }
 
 const (

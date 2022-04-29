@@ -8,7 +8,7 @@ import (
 	"github.com/esvarez/game-nest-service/service/boardgame/entity"
 )
 
-func newBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
+func NewBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
 	return &entity.BoardGame{
 		ID:          bg.ID[strings.Index(bg.ID, "#")+1:],
 		Name:        bg.Name,
@@ -22,12 +22,12 @@ func newBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
 	}
 }
 
-func newBoardGameRecord(b *dto.BoardGame) BoardGameRecord {
+func NewBoardGameRecord(b *dto.BoardGame) BoardGameRecord {
 	return BoardGameRecord{
 		record: record{
 			ID:         newBoardGameRecordHashKey(),
 			SK:         newBoardGameRecordRangeKey(),
-			RecordType: boardGameRecordName,
+			RecordType: BoardGameRecordName,
 			Version:    0,
 		},
 		boardGameRecordFields: boardGameRecordFields{
@@ -42,11 +42,11 @@ func newBoardGameRecord(b *dto.BoardGame) BoardGameRecord {
 }
 
 func newBoardGameRecordHashKey() string {
-	return boardGameRecordName + "#" + uuid.NewID().String()
+	return BoardGameRecordName + "#" + uuid.NewID().String()
 }
 
 func newBoardGameRecordRangeKey() string {
-	return boardGameRecordName
+	return BoardGameRecordName
 }
 
 type BoardGameRecord struct {

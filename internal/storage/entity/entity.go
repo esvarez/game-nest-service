@@ -9,7 +9,7 @@ func newUserRecord(user *entity.User) userRecord {
 		record: record{
 			ID:         newUserRecordHashKey(""),
 			SK:         newUSerRecordRangeKey(),
-			RecordType: userRecordName,
+			RecordType: UserRecordName,
 			Version:    0,
 		},
 		userRecordFields: userRecordFields{
@@ -24,7 +24,7 @@ func newUserRecordHashKey(id string) string {
 }
 
 func newUSerRecordRangeKey() string {
-	return userRecordName
+	return UserRecordName
 }
 
 type userRecord struct {

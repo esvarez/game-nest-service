@@ -1,8 +1,8 @@
 package storage
 
 const (
-	boardGameRecordName = "boardGame"
-	userRecordName      = "user"
+	BoardGameRecordName = "boardGame"
+	UserRecordName      = "user"
 )
 
 type record struct {
