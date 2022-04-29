@@ -81,44 +81,26 @@ func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
 	return newBoardGameFromRecord(record), nil
 }
 
-/*
-func (g *GameClient) Update(game *entity2.Game) error {
-	game.PK = pkGame + game.PK
-	game.SK = skGame + game.SK
+func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
+	pk := boardGameRecordName + "#" + id
+	sk := boardGameRecordName
 
-	update := expression.Set(expression.Name("SK"), expression.Value(game.SK)).
+	update := expression.Set(expression.Name("Name"), expression.Value(game.Name)).
 		Set(expression.Name("MinPlayers"), expression.Value(game.MinPlayers)).
 		Set(expression.Name("MaxPlayers"), expression.Value(game.MaxPlayers)).
 		Set(expression.Name("Description"), expression.Value(game.Description)).
 		Set(expression.Name("Duration"), expression.Value(game.Duration)).
-		Set(expression.Name("UpdatedAt"), expression.Value(time.Now().Unix()))
-	// TODO move to method
+		Set(expression.Name("UpdatedAt"), expression.Value(g.now()))
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
 	if err != nil {
 		g.log.WithError(err).Error("error building expression")
-		return fmt.Errorf("%v: error building expression %w", err, entity.ErrAWSConfig)
+		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
 	}
-	_, err = g.repo.Client.UpdateItem(&dynamodb.UpdateItemInput{
-		//TableName: aws.String(g.Table),
-		Key: map[string]*dynamodb.AttributeValue{
-			"PK": {
-				S: aws.String(game.PK),
-			},
-			"SK": {
-				S: aws.String(game.SK),
-			},
-		},
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-		UpdateExpression:          expr.Update(),
-	})
-	if err != nil {
-		g.log.WithError(err).Error("error updating game item")
-		return fmt.Errorf("%v: error updating item %w", err, entity.ErrDynamoDB)
-	}
-	return nil
+
+	return g.repo.UpdateItem(pk, sk, expr)
 }
 
+/*
 func (g *GameClient) Delete(key string) error {
 	filt := expression.Name("PK").BeginsWith(pkGame).
 		And(expression.Name("SK").BeginsWith(skGame))

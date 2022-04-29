@@ -61,6 +61,27 @@ func (r *Storage) QueryIndex(expr expression.Expression, index string) (*dynamod
 	return result, nil
 }
 
+func (r *Storage) UpdateItem(pk, sk string, expr expression.Expression) error {
+	_, err := r.Client.UpdateItem(&dynamodb.UpdateItemInput{
+		TableName: aws.String(r.TableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			"PK": {
+				S: aws.String(pk),
+			},
+			"SK": {
+				S: aws.String(sk),
+			},
+		},
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		UpdateExpression:          expr.Update(),
+	})
+	if err != nil {
+		return fmt.Errorf("%v: error updating item %w", err, entity.ErrDynamoDB)
+	}
+	return nil
+}
+
 func getItem[T Record](pk, sk, table string, client *dynamodb.DynamoDB) (*T, error) {
 	result, err := client.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(table),
