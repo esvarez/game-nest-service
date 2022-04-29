@@ -1,12 +1,14 @@
-package config
+package logger
 
 import (
 	"os"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/esvarez/game-nest-service/config"
 )
 
-func CreateLogger(conf *Configuration) *log.Logger {
+func CreateLogger(conf *config.Configuration) *log.Logger {
 	logLevel, err := log.ParseLevel(*conf.LogLevel)
 	if err != nil {
 		log.WithField("logLevel", *conf.LogLevel).

@@ -5,14 +5,13 @@ import (
 	"errors"
 	"github.com/esvarez/game-nest-service/api/presenter"
 	"github.com/esvarez/game-nest-service/dto"
-	"github.com/esvarez/game-nest-service/entity"
+	"github.com/esvarez/game-nest-service/internal/entity"
 	"github.com/esvarez/game-nest-service/internal/web"
+	"github.com/esvarez/game-nest-service/src/game"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
-
-	"github.com/esvarez/game-nest-service/service/game"
 )
 
 type GameHandler struct {

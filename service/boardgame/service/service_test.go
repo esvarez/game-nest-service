@@ -1,6 +1,9 @@
-package game
+package service
 
 import (
+	"github.com/esvarez/game-nest-service/internal/entity"
+	entity2 "github.com/esvarez/game-nest-service/service/boardgame/entity"
+	"github.com/esvarez/game-nest-service/src/game/mocks"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
@@ -9,8 +12,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/esvarez/game-nest-service/dto"
-	"github.com/esvarez/game-nest-service/entity"
-	"github.com/esvarez/game-nest-service/service/game/mocks"
 )
 
 //go:generate mockery --name Repository --dir ./service/game --outpkg mocks --output ./service/game/mocks --case=underscore
@@ -61,12 +62,12 @@ func TestService_Save(t *testing.T) {
 
 func TestService_Get(t *testing.T) {
 	tests := map[string]struct {
-		gamesExpected []*entity.Game
+		gamesExpected []*entity2.Game
 		expectedError error
 		mockSetup     func(repo *mocks.Repository)
 	}{
 		"returns all games": {
-			gamesExpected: []*entity.Game{
+			gamesExpected: []*entity2.Game{
 				{
 					PK:          "1",
 					SK:          "Catan",
@@ -85,7 +86,7 @@ func TestService_Get(t *testing.T) {
 				},
 			},
 			mockSetup: func(repo *mocks.Repository) {
-				repo.On("GetAll").Return([]*entity.Game{
+				repo.On("GetAll").Return([]*entity2.Game{
 					{
 						PK:          "1",
 						SK:          "Catan",
@@ -130,13 +131,13 @@ func TestService_Get(t *testing.T) {
 
 func TestService_Find(t *testing.T) {
 	tests := map[string]struct {
-		gameExpected  *entity.Game
+		gameExpected  *entity2.Game
 		expectedError error
 		partitionKey  string
 		mockSetup     func(repo *mocks.Repository)
 	}{
 		"returns game": {
-			gameExpected: &entity.Game{
+			gameExpected: &entity2.Game{
 				PK:          "1",
 				SK:          "Catan",
 				MinPlayers:  3,
@@ -146,7 +147,7 @@ func TestService_Find(t *testing.T) {
 			},
 			partitionKey: "Catan",
 			mockSetup: func(repo *mocks.Repository) {
-				repo.On("Find", mock.Anything).Return(&entity.Game{
+				repo.On("Find", mock.Anything).Return(&entity2.Game{
 					PK:          "1",
 					SK:          "Catan",
 					MinPlayers:  3,

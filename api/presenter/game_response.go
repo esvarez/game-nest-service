@@ -1,6 +1,8 @@
 package presenter
 
-import "github.com/esvarez/game-nest-service/entity"
+import (
+	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+)
 
 type GameResponse struct {
 	ID          string `json:"id"`

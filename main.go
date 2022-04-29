@@ -4,14 +4,15 @@ import (
 	"flag"
 
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/esvarez/game-nest-service/api"
-	"github.com/esvarez/game-nest-service/internal/config"
+	"github.com/esvarez/game-nest-service/config"
+	"github.com/esvarez/game-nest-service/internal/logger"
 )
 
 func main() {
-	log.Info("nest game is running")
+	logrus.Info("nest game is running")
 
 	var pathFile string
 	flag.StringVar(&pathFile, "public-config", "./config.yml", "Path to public config file")
@@ -19,8 +20,8 @@ func main() {
 	var (
 		validator = validator.New()
 		conf      = config.LoadConfiguration(pathFile, validator)
-		logger    = config.CreateLogger(conf)
+		log       = logger.CreateLogger(conf)
 	)
 
-	api.Start(conf, logger, validator)
+	api.Start(conf, log, validator)
 }

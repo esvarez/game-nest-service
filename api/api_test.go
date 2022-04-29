@@ -2,6 +2,9 @@ package api
 
 import (
 	"flag"
+	config2 "github.com/esvarez/game-nest-service/config"
+	"github.com/esvarez/game-nest-service/internal/logger"
+	"github.com/esvarez/game-nest-service/src/game"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -13,9 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/esvarez/game-nest-service/api/handler"
-	"github.com/esvarez/game-nest-service/internal/config"
 	"github.com/esvarez/game-nest-service/internal/storage"
-	"github.com/esvarez/game-nest-service/service/game"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 )
@@ -123,11 +124,12 @@ func setUp() http.Handler {
 	var pathFile string
 	flag.StringVar(&pathFile, "public-config-file",
 		"./test_file/config.yml", "Path to public config file")
+	return
 
 	var (
 		v      = validator.New()
-		conf   = config.LoadConfiguration(pathFile, v)
-		l      = config.CreateLogger(conf)
+		conf   = config2.LoadConfiguration(pathFile, v)
+		l      = logger.CreateLogger(conf)
 		r      = mux.NewRouter()
 		client = storage.CreateDynamoClient(conf)
 

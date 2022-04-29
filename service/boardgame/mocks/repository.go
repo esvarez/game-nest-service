@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	entity "github.com/esvarez/game-nest-service/entity"
+	"github.com/esvarez/game-nest-service/service/boardgame/entity"
 
 	mock "github.com/stretchr/testify/mock"
 
