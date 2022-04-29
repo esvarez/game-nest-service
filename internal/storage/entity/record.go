@@ -1,5 +1,10 @@
 package storage
 
+const (
+	boardGameRecordName = "boardGame"
+	userRecordName      = "user"
+)
+
 type record struct {
 	ID         string `json:"PK"`
 	SK         string `json:"SK"`

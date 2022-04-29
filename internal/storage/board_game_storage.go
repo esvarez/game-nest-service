@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"github.com/esvarez/game-nest-service/internal/storage/entity"
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -42,7 +43,7 @@ func (g *BoardGameStorage) Set(item *dto.BoardGame) error {
 }
 
 func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
-	key := expression.Key("SK").Equal(expression.Value(boardGameRecordName))
+	key := expression.Key("SK").Equal(expression.Value(storage.boardGameRecordName))
 
 	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
 	if err != nil {
@@ -70,8 +71,8 @@ func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 }
 
 func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
-	pk := boardGameRecordName + "#" + id
-	sk := boardGameRecordName
+	pk := storage.boardGameRecordName + "#" + id
+	sk := storage.boardGameRecordName
 
 	record, err := getItem[BoardGameRecord](pk, sk, g.repo.TableName, g.repo.Client)
 	if err != nil {
@@ -82,8 +83,8 @@ func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
 }
 
 func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
-	pk := boardGameRecordName + "#" + id
-	sk := boardGameRecordName
+	pk := storage.boardGameRecordName + "#" + id
+	sk := storage.boardGameRecordName
 
 	update := expression.Set(expression.Name("Name"), expression.Value(game.Name)).
 		Set(expression.Name("MinPlayers"), expression.Value(game.MinPlayers)).
@@ -100,33 +101,16 @@ func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
 	return g.repo.UpdateItem(pk, sk, expr)
 }
 
-/*
-func (g *GameClient) Delete(key string) error {
-	filt := expression.Name("PK").BeginsWith(pkGame).
-		And(expression.Name("SK").BeginsWith(skGame))
-	// TODO move to a common function
-	expr, err := expression.NewBuilder().WithFilter(filt).Build()
+func (g *BoardGameStorage) Delete(id string) error {
+	pk := storage.boardGameRecordName + "#" + id
+	sk := storage.boardGameRecordName
+	f := expression.Name("PK").Equal(expression.Value(pk)).
+		And(expression.Name("SK").Equal(expression.Value(sk)))
+	expr, err := expression.NewBuilder().WithCondition(f).Build()
 	if err != nil {
 		g.log.WithError(err).Error("error building expression")
-		return fmt.Errorf("%v: error building expression %w", err, entity.ErrAWSConfig)
+		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
 	}
 
-	_, err = g.repo.Client.DeleteItem(&dynamodb.DeleteItemInput{
-		// TableName: aws.String(g.Table),
-		Key: map[string]*dynamodb.AttributeValue{
-			"PK": {
-				S: aws.String(pkGame + key),
-			},
-			"SK": {
-				S: aws.String(skGame + key),
-			},
-		},
-		ConditionExpression: expr.Condition(),
-	})
-	if err != nil {
-		g.log.WithError(err).Error("error deleting game item")
-		return fmt.Errorf("%v: error deleting item %w", err, entity.ErrDynamoDB)
-	}
-	return nil
+	return g.repo.DeleteItem(pk, sk, expr)
 }
-*/

@@ -82,6 +82,27 @@ func (r *Storage) UpdateItem(pk, sk string, expr expression.Expression) error {
 	return nil
 }
 
+func (r *Storage) DeleteItem(pk, sk string, expr expression.Expression) error {
+	_, err := r.Client.DeleteItem(&dynamodb.DeleteItemInput{
+		TableName:                 aws.String(r.TableName),
+		ConditionExpression:       expr.Condition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		Key: map[string]*dynamodb.AttributeValue{
+			"PK": {
+				S: aws.String(pk),
+			},
+			"SK": {
+				S: aws.String(sk),
+			},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("%v: error deleting item %w", err, entity.ErrDynamoDB)
+	}
+	return nil
+}
+
 func getItem[T Record](pk, sk, table string, client *dynamodb.DynamoDB) (*T, error) {
 	result, err := client.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(table),

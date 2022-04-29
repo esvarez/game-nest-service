@@ -8,11 +8,6 @@ import (
 	"github.com/esvarez/game-nest-service/service/boardgame/entity"
 )
 
-const (
-	boardGameRecordName = "boardGame"
-	userRecordName      = "user"
-)
-
 func newBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
 	return &entity.BoardGame{
 		ID:          bg.ID[strings.Index(bg.ID, "#")+1:],
@@ -67,38 +62,4 @@ type boardGameRecordFields struct {
 	MaxPlayers  int8   `json:"MaxPlayers"`
 	Duration    uint32 `json:"Duration"`
 	Description string `json:"Description"`
-}
-
-func newUserRecord(user *entity.User) userRecord {
-	return userRecord{
-		record: record{
-			ID:         newUserRecordHashKey(""),
-			SK:         newUSerRecordRangeKey(),
-			RecordType: userRecordName,
-			Version:    0,
-		},
-		userRecordFields: userRecordFields{
-			User:  "",
-			Email: "",
-		},
-	}
-}
-
-func newUserRecordHashKey(id string) string {
-	return pkGame + id
-}
-
-func newUSerRecordRangeKey() string {
-	return userRecordName
-}
-
-type userRecord struct {
-	record
-	userRecordFields
-	audit
-}
-
-type userRecordFields struct {
-	User  string `json:"user"`
-	Email string `json:"email"`
 }

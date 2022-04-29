@@ -1,9 +1,11 @@
 package storage
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/esvarez/game-nest-service/config"
+	"github.com/esvarez/game-nest-service/internal/entity"
 	"github.com/esvarez/game-nest-service/internal/logger"
 	"github.com/esvarez/game-nest-service/service/boardgame/dto"
 )
@@ -178,6 +180,56 @@ func TestStorage_UpdateIntegration(t *testing.T) {
 	}
 	if game.MaxPlayers != 5 {
 		t.Errorf("expected max players %d, got %d", 5, game.MaxPlayers)
+	}
+}
+
+func TestStorage_DeleteIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test")
+	}
+	name := createLocalTable(t)
+	defer deleteLocalTable(t, name)
+	bgs := getBGStorage(name)
+	bg := &dto.BoardGame{
+		Name:       "cite",
+		MinPlayers: 1,
+		MaxPlayers: 1,
+		Duration:   1,
+	}
+	if err := bgs.Set(bg); err != nil {
+		t.Errorf("failed to create boardgame: %v", err)
+	}
+	bGames, err := bgs.GetAll()
+	if err != nil {
+		t.Errorf("failed to get all boardgames: %v", err)
+	}
+	id := bGames[0].ID
+
+	game, err := bgs.Find(id)
+	if err != nil {
+		t.Errorf("failed to find boardgame: %v", err)
+	}
+	if game.ID != id {
+		t.Errorf("expected id %s, got %s", id, game.ID)
+	}
+	if game.Name != "cite" {
+		t.Errorf("expected name %s, got %s", "cite", game.Name)
+	}
+	if game.MinPlayers != 1 {
+		t.Errorf("expected min players %d, got %d", 1, game.MinPlayers)
+	}
+	if game.MaxPlayers != 1 {
+		t.Errorf("expected max players %d, got %d", 5, game.MaxPlayers)
+	}
+
+	err = bgs.Delete(id)
+	if err != nil {
+		t.Errorf("failed to delete boardgame: %v", err)
+	}
+
+	game, err = bgs.Find(id)
+	if !errors.Is(err, entity.ErrItemNotFound) {
+		t.Errorf("expected nof found, got: %v", err)
 	}
 }
 
