@@ -3,7 +3,8 @@
 package mocks
 
 import (
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+	dto "github.com/esvarez/game-nest-service/service/boardgame/dto"
+	entity "github.com/esvarez/game-nest-service/service/boardgame/entity"
 
 	mock "github.com/stretchr/testify/mock"
 
@@ -15,13 +16,13 @@ type Repository struct {
 	mock.Mock
 }
 
-// Delete provides a mock function with given fields: key
-func (_m *Repository) Delete(key string) error {
-	ret := _m.Called(key)
+// Delete provides a mock function with given fields: id
+func (_m *Repository) Delete(id string) error {
+	ret := _m.Called(id)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(key)
+		r0 = rf(id)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -29,22 +30,22 @@ func (_m *Repository) Delete(key string) error {
 	return r0
 }
 
-// Find provides a mock function with given fields: key
-func (_m *Repository) Find(key string) (*entity.Game, error) {
-	ret := _m.Called(key)
+// Find provides a mock function with given fields: id
+func (_m *Repository) Find(id string) (*entity.BoardGame, error) {
+	ret := _m.Called(id)
 
-	var r0 *entity.Game
-	if rf, ok := ret.Get(0).(func(string) *entity.Game); ok {
-		r0 = rf(key)
+	var r0 *entity.BoardGame
+	if rf, ok := ret.Get(0).(func(string) *entity.BoardGame); ok {
+		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.Game)
+			r0 = ret.Get(0).(*entity.BoardGame)
 		}
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(key)
+		r1 = rf(id)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -53,15 +54,15 @@ func (_m *Repository) Find(key string) (*entity.Game, error) {
 }
 
 // GetAll provides a mock function with given fields:
-func (_m *Repository) GetAll() ([]*entity.Game, error) {
+func (_m *Repository) GetAll() ([]*entity.BoardGame, error) {
 	ret := _m.Called()
 
-	var r0 []*entity.Game
-	if rf, ok := ret.Get(0).(func() []*entity.Game); ok {
+	var r0 []*entity.BoardGame
+	if rf, ok := ret.Get(0).(func() []*entity.BoardGame); ok {
 		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*entity.Game)
+			r0 = ret.Get(0).([]*entity.BoardGame)
 		}
 	}
 
@@ -76,11 +77,11 @@ func (_m *Repository) GetAll() ([]*entity.Game, error) {
 }
 
 // Set provides a mock function with given fields: item
-func (_m *Repository) Set(item *entity.Game) error {
+func (_m *Repository) Set(item *dto.BoardGame) error {
 	ret := _m.Called(item)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.Game) error); ok {
+	if rf, ok := ret.Get(0).(func(*dto.BoardGame) error); ok {
 		r0 = rf(item)
 	} else {
 		r0 = ret.Error(0)
@@ -89,13 +90,13 @@ func (_m *Repository) Set(item *entity.Game) error {
 	return r0
 }
 
-// Update provides a mock function with given fields: item
-func (_m *Repository) Update(item *entity.Game) error {
-	ret := _m.Called(item)
+// Update provides a mock function with given fields: id, game
+func (_m *Repository) Update(id string, game *dto.BoardGame) error {
+	ret := _m.Called(id, game)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.Game) error); ok {
-		r0 = rf(item)
+	if rf, ok := ret.Get(0).(func(string, *dto.BoardGame) error); ok {
+		r0 = rf(id, game)
 	} else {
 		r0 = ret.Error(0)
 	}

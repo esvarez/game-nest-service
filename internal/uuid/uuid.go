@@ -1,4 +1,4 @@
-package entity
+package uuid
 
 import (
 	"encoding/base64"

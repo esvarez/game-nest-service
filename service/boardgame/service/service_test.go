@@ -1,9 +1,6 @@
-package service
+package boardgame
 
 import (
-	"github.com/esvarez/game-nest-service/internal/entity"
-	entity2 "github.com/esvarez/game-nest-service/service/boardgame/entity"
-	"github.com/esvarez/game-nest-service/src/game/mocks"
 	"testing"
 
 	"github.com/go-playground/validator/v10"
@@ -11,19 +8,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"github.com/esvarez/game-nest-service/dto"
+	errs "github.com/esvarez/game-nest-service/internal/error"
+	"github.com/esvarez/game-nest-service/service/boardgame/dto"
+	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+	"github.com/esvarez/game-nest-service/service/boardgame/service/mocks"
 )
 
-//go:generate mockery --name Repository --dir ./service/game --outpkg mocks --output ./service/game/mocks --case=underscore
+//go:generate mockery --name Repository --dir ./service/boardgame/service --outpkg mocks --output ./service/boardgame/service/mocks --case=underscore
 
 func TestService_Save(t *testing.T) {
 	tests := map[string]struct {
-		data          *dto.Game
+		data          *dto.BoardGame
 		expectedError error
 		mockSetup     func(repo *mocks.Repository)
 	}{
-		"should update satellite": {
-			data: &dto.Game{
+		"should save board game": {
+			data: &dto.BoardGame{
 				Name:        "Catan",
 				MinPlayers:  3,
 				MaxPlayers:  4,
@@ -35,8 +35,8 @@ func TestService_Save(t *testing.T) {
 			},
 		},
 		"should return error validation": {
-			data:          &dto.Game{},
-			expectedError: entity.ErrInvalidEntity,
+			data:          &dto.BoardGame{},
+			expectedError: errs.ErrInvalidEntity,
 		},
 	}
 
@@ -62,23 +62,23 @@ func TestService_Save(t *testing.T) {
 
 func TestService_Get(t *testing.T) {
 	tests := map[string]struct {
-		gamesExpected []*entity2.Game
+		gamesExpected []*entity.BoardGame
 		expectedError error
 		mockSetup     func(repo *mocks.Repository)
 	}{
 		"returns all games": {
-			gamesExpected: []*entity2.Game{
+			gamesExpected: []*entity.BoardGame{
 				{
-					PK:          "1",
-					SK:          "Catan",
+					ID:          "1",
+					Name:        "Catan",
 					MinPlayers:  3,
 					MaxPlayers:  4,
 					Description: "",
 					Duration:    120,
 				},
 				{
-					PK:          "2",
-					SK:          "Monopoly",
+					ID:          "2",
+					Name:        "Monopoly",
 					MinPlayers:  2,
 					MaxPlayers:  4,
 					Description: "",
@@ -86,18 +86,18 @@ func TestService_Get(t *testing.T) {
 				},
 			},
 			mockSetup: func(repo *mocks.Repository) {
-				repo.On("GetAll").Return([]*entity2.Game{
+				repo.On("GetAll").Return([]*entity.BoardGame{
 					{
-						PK:          "1",
-						SK:          "Catan",
+						ID:          "1",
+						Name:        "Catan",
 						MinPlayers:  3,
 						MaxPlayers:  4,
 						Description: "",
 						Duration:    120,
 					},
 					{
-						PK:          "2",
-						SK:          "Monopoly",
+						ID:          "2",
+						Name:        "Monopoly",
 						MinPlayers:  2,
 						MaxPlayers:  4,
 						Description: "",
@@ -131,15 +131,15 @@ func TestService_Get(t *testing.T) {
 
 func TestService_Find(t *testing.T) {
 	tests := map[string]struct {
-		gameExpected  *entity2.Game
+		gameExpected  *entity.BoardGame
 		expectedError error
 		partitionKey  string
 		mockSetup     func(repo *mocks.Repository)
 	}{
 		"returns game": {
-			gameExpected: &entity2.Game{
-				PK:          "1",
-				SK:          "Catan",
+			gameExpected: &entity.BoardGame{
+				ID:          "1",
+				Name:        "Catan",
 				MinPlayers:  3,
 				MaxPlayers:  4,
 				Description: "",
@@ -147,9 +147,9 @@ func TestService_Find(t *testing.T) {
 			},
 			partitionKey: "Catan",
 			mockSetup: func(repo *mocks.Repository) {
-				repo.On("Find", mock.Anything).Return(&entity2.Game{
-					PK:          "1",
-					SK:          "Catan",
+				repo.On("Find", mock.Anything).Return(&entity.BoardGame{
+					ID:          "1",
+					Name:        "Catan",
 					MinPlayers:  3,
 					MaxPlayers:  4,
 					Description: "",
@@ -158,10 +158,10 @@ func TestService_Find(t *testing.T) {
 			},
 		},
 		"game not found": {
-			expectedError: entity.ErrItemNotFound,
+			expectedError: errs.ErrItemNotFound,
 			partitionKey:  "not a game",
 			mockSetup: func(repo *mocks.Repository) {
-				repo.On("Find", mock.Anything).Return(nil, entity.ErrItemNotFound)
+				repo.On("Find", mock.Anything).Return(nil, errs.ErrItemNotFound)
 			},
 		},
 	}
@@ -183,6 +183,90 @@ func TestService_Find(t *testing.T) {
 			game, err := svc.Find(tc.partitionKey)
 			assert.ErrorIs(t, err, tc.expectedError)
 			assert.Equal(t, game, tc.gameExpected)
+		})
+	}
+}
+
+func TestService_Update(t *testing.T) {
+	tests := map[string]struct {
+		data          *dto.BoardGame
+		id            string
+		expectedError error
+		mockSetup     func(repo *mocks.Repository)
+	}{
+		"should return invalid validation": {
+			data: &dto.BoardGame{
+				Name:       "Root",
+				MinPlayers: -1,
+				MaxPlayers: 4,
+			},
+			expectedError: errs.ErrInvalidEntity,
+		},
+		"should update board game": {
+			id: "1",
+			data: &dto.BoardGame{
+				Name:        "Root",
+				MinPlayers:  1,
+				MaxPlayers:  4,
+				Description: "",
+				Duration:    120,
+			},
+			mockSetup: func(repo *mocks.Repository) {
+				repo.On("Update", mock.Anything, mock.Anything).Return(nil)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var (
+				repo = &mocks.Repository{}
+				l    = logrus.New()
+				v    = validator.New()
+				svc  = NewService(repo, l, v)
+			)
+			l.SetLevel(logrus.DebugLevel)
+
+			if tc.mockSetup != nil {
+				tc.mockSetup(repo)
+			}
+
+			err := svc.Update(tc.id, tc.data)
+			assert.ErrorIs(t, err, tc.expectedError)
+		})
+	}
+}
+
+func TestService_Delete(t *testing.T) {
+	tests := map[string]struct {
+		id            string
+		expectedError error
+		mockSetup     func(repo *mocks.Repository)
+	}{
+		"should delete board game": {
+			id: "1",
+			mockSetup: func(repo *mocks.Repository) {
+				repo.On("Delete", mock.Anything).Return(nil)
+			},
+		},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			var (
+				repo = &mocks.Repository{}
+				l    = logrus.New()
+				v    = validator.New()
+				svc  = NewService(repo, l, v)
+			)
+			l.SetLevel(logrus.DebugLevel)
+
+			if tc.mockSetup != nil {
+				tc.mockSetup(repo)
+			}
+
+			err := svc.Delete(tc.id)
+			assert.ErrorIs(t, err, tc.expectedError)
 		})
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/sirupsen/logrus"
 
-	errs "github.com/esvarez/game-nest-service/internal/entity"
+	errs "github.com/esvarez/game-nest-service/internal/error"
 	"github.com/esvarez/game-nest-service/internal/storage/entity"
 	"github.com/esvarez/game-nest-service/service/boardgame/dto"
 	"github.com/esvarez/game-nest-service/service/boardgame/entity"
@@ -51,7 +51,7 @@ func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
 	}
 
-	result, err := g.repo.QueryIndex(expr, SKIndex)
+	result, err := g.repo.Query(expr, SKIndex)
 
 	games := make([]*entity.BoardGame, len(result.Items))
 	if len(games) == 0 {
@@ -113,4 +113,32 @@ func (g *BoardGameStorage) Delete(id string) error {
 	}
 
 	return g.repo.DeleteItem(pk, sk, expr)
+}
+
+func (g *BoardGameStorage) FindByUrl(url string) (*entity.BoardGame, error) {
+
+	key := expression.Key("Url").Equal(expression.Value(url))
+
+	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
+	if err != nil {
+		g.log.WithError(err).Error("error building expression")
+		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
+	}
+
+	result, err := g.repo.Query(expr, UrlIndex)
+	if err != nil {
+		g.log.WithError(err).Error("error getting board game")
+		return nil, fmt.Errorf("%v: error getting board game %w", err, errs.ErrAWSConfig)
+	}
+	if len(result.Items) == 0 {
+		g.log.Warn("No games found")
+		return nil, fmt.Errorf("no baord game found: %w", errs.ErrItemNotFound)
+	}
+
+	bg := &storage.BoardGameRecord{}
+	if err = dynamodbattribute.UnmarshalMap(result.Items[0], bg); err != nil {
+		g.log.WithError(err).Error("error unmarshalling game entity")
+		return nil, fmt.Errorf("%v: error unmarshalling game entity %w", err, errs.ErrEntityUnmarshal)
+	}
+	return storage.NewBoardGameFromRecord(bg), nil
 }

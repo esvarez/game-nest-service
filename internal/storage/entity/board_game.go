@@ -3,7 +3,7 @@ package storage
 import (
 	"strings"
 
-	uuid "github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/uuid"
 	"github.com/esvarez/game-nest-service/service/boardgame/dto"
 	"github.com/esvarez/game-nest-service/service/boardgame/entity"
 )

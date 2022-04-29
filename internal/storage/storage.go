@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
-	"github.com/esvarez/game-nest-service/internal/entity"
+	errs "github.com/esvarez/game-nest-service/internal/error"
 	storage "github.com/esvarez/game-nest-service/internal/storage/entity"
 )
 
@@ -17,7 +17,8 @@ type Record interface {
 }
 
 const (
-	SKIndex = "SKIndex"
+	SKIndex  = "SKIndex"
+	UrlIndex = "UrlIndex"
 )
 
 type Storage struct {
@@ -35,7 +36,7 @@ func NewStorage(tableName string, client *dynamodb.DynamoDB) *Storage {
 func (r *Storage) PutItem(item any) error {
 	av, err := dynamodbattribute.MarshalMap(item)
 	if err != nil {
-		return fmt.Errorf("%v: error marshalling game entity %w", err, entity.ErrEntityMarshal)
+		return fmt.Errorf("%v: error marshalling game entity %w", err, errs.ErrEntityMarshal)
 	}
 
 	_, err = r.Client.PutItem(&dynamodb.PutItemInput{
@@ -43,12 +44,12 @@ func (r *Storage) PutItem(item any) error {
 		TableName: aws.String(r.TableName),
 	})
 	if err != nil {
-		return fmt.Errorf("%v: error putting item %w", err, entity.ErrDynamoDB)
+		return fmt.Errorf("%v: error putting item %w", err, errs.ErrDynamoDB)
 	}
 	return nil
 }
 
-func (r *Storage) QueryIndex(expr expression.Expression, index string) (*dynamodb.QueryOutput, error) {
+func (r *Storage) Query(expr expression.Expression, index string) (*dynamodb.QueryOutput, error) {
 	result, err := r.Client.Query(&dynamodb.QueryInput{
 		TableName:                 aws.String(r.TableName),
 		IndexName:                 aws.String(index),
@@ -57,7 +58,7 @@ func (r *Storage) QueryIndex(expr expression.Expression, index string) (*dynamod
 		ExpressionAttributeValues: expr.Values(),
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%v: error querying dynamo %w", err, entity.ErrDynamoDB)
+		return nil, fmt.Errorf("%v: error querying dynamo %w", err, errs.ErrDynamoDB)
 	}
 	return result, nil
 }
@@ -78,7 +79,7 @@ func (r *Storage) UpdateItem(pk, sk string, expr expression.Expression) error {
 		UpdateExpression:          expr.Update(),
 	})
 	if err != nil {
-		return fmt.Errorf("%v: error updating item %w", err, entity.ErrDynamoDB)
+		return fmt.Errorf("%v: error updating item %w", err, errs.ErrDynamoDB)
 	}
 	return nil
 }
@@ -99,7 +100,7 @@ func (r *Storage) DeleteItem(pk, sk string, expr expression.Expression) error {
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("%v: error deleting item %w", err, entity.ErrDynamoDB)
+		return fmt.Errorf("%v: error deleting item %w", err, errs.ErrDynamoDB)
 	}
 	return nil
 }
@@ -117,15 +118,15 @@ func getItem[T Record](pk, sk, table string, client *dynamodb.DynamoDB) (*T, err
 		},
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%v: error getting item %w", err, entity.ErrDynamoDB)
+		return nil, fmt.Errorf("%v: error getting item %w", err, errs.ErrDynamoDB)
 	}
 	if len(result.Item) == 0 {
-		return nil, fmt.Errorf("item not found %w", entity.ErrItemNotFound)
+		return nil, fmt.Errorf("item not found %w", errs.ErrItemNotFound)
 	}
 
 	game := &T{}
 	if err = dynamodbattribute.UnmarshalMap(result.Item, game); err != nil {
-		return nil, fmt.Errorf("%v: error unmarshalling item entity %w", err, entity.ErrEntityUnmarshal)
+		return nil, fmt.Errorf("%v: error unmarshalling item entity %w", err, errs.ErrEntityUnmarshal)
 	}
 	return game, nil
 }

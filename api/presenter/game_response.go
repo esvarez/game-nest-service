@@ -1,10 +1,8 @@
 package presenter
 
-import (
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
-)
+import "github.com/esvarez/game-nest-service/service/boardgame/entity"
 
-type GameResponse struct {
+type BoardGameResponse struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`
 	MinPlayers  int8   `json:"min_players"`
@@ -13,8 +11,8 @@ type GameResponse struct {
 	Duration    uint32 `json:"duration"`
 }
 
-func (g *GameResponse) BuildResponse(game *entity.Game) {
-	g.ID = game.PK
+func (g *BoardGameResponse) BuildResponse(game *entity.BoardGame) {
+	g.ID = game.ID
 	g.Name = game.Name
 	g.MinPlayers = game.MinPlayers
 	g.MaxPlayers = game.MaxPlayers

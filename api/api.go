@@ -16,14 +16,13 @@ func Start(conf *config.Configuration, log *logrus.Logger, validate *validator.V
 		router = mux.NewRouter()
 		client = storage.NewDynamoClient(conf)
 
-		stor = storage.NewStorage(*conf.DynamoDB.Table, client)
+		store = storage.NewStorage(*conf.DynamoDB.Table, client)
 
-		boardGameStore = storage.NewBoardGameStorage(log, stor)
+		boardGameStore = storage.NewBoardGameStorage(log, store)
 
-		// gameService = game.(gameClient, log, validate)
-		boardGameService = service.NewService(boardGameStore, log, validate)
+		boardGameService = boardgame.NewService(boardGameStore, log, validate)
 
-		gameHandler = handler.NewGameHandler(boardGameService, log)
+		gameHandler = handler.NewBoardGameHandler(boardGameService, log)
 	)
 
 	router = router.PathPrefix("/api/v1").Subrouter()

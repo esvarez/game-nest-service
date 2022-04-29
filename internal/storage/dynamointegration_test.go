@@ -33,6 +33,10 @@ func createLocalTable(t *testing.T) (name string) {
 				AttributeName: aws.String("SK"),
 				AttributeType: aws.String("S"),
 			},
+			{
+				AttributeName: aws.String("Url"),
+				AttributeType: aws.String("S"),
+			},
 		},
 		KeySchema: []*dynamodb.KeySchemaElement{
 			{
@@ -50,6 +54,18 @@ func createLocalTable(t *testing.T) (name string) {
 				KeySchema: []*dynamodb.KeySchemaElement{
 					{
 						AttributeName: aws.String("SK"),
+						KeyType:       aws.String("HASH"),
+					},
+				},
+				Projection: &dynamodb.Projection{
+					ProjectionType: aws.String("ALL"),
+				},
+			},
+			{
+				IndexName: aws.String("UrlIndex"),
+				KeySchema: []*dynamodb.KeySchemaElement{
+					{
+						AttributeName: aws.String("Url"),
 						KeyType:       aws.String("HASH"),
 					},
 				},
