@@ -21,7 +21,7 @@ type Repository interface {
 	Writer
 }
 
-type UserCase interface {
+type UseCase interface {
 	Get() ([]*entity.User, error)
 	Find(id string) (*entity.User, error)
 	Create(user *dto.User) (*entity.User, error)

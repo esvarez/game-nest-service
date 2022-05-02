@@ -47,7 +47,10 @@ func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 	}
 
 	result, err := g.repo.Query(expr, SKIndex)
-
+	if err != nil {
+		g.log.WithError(err).Error("error querying board game records")
+		return nil, fmt.Errorf("%v: error querying: %w", err, errs.ErrAWSConfig)
+	}
 	games := make([]*entity.BoardGame, len(result.Items))
 	if len(games) == 0 {
 		g.log.Warn("No games found")
