@@ -87,13 +87,8 @@ func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
 		Set(expression.Name("Description"), expression.Value(game.Description)).
 		Set(expression.Name("Duration"), expression.Value(game.Duration)).
 		Set(expression.Name("UpdatedAt"), expression.Value(g.now()))
-	expr, err := expression.NewBuilder().WithUpdate(update).Build()
-	if err != nil {
-		g.log.WithError(err).Error("error building expression")
-		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
-	}
 
-	return g.repo.UpdateItem(pk, sk, expr)
+	return g.repo.UpdateItem(pk, sk, update)
 }
 
 func (g *BoardGameStorage) Delete(id string) error {

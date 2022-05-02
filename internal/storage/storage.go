@@ -63,8 +63,13 @@ func (r *Storage) Query(expr expression.Expression, index string) (*dynamodb.Que
 	return result, nil
 }
 
-func (r *Storage) UpdateItem(pk, sk string, expr expression.Expression) error {
-	_, err := r.Client.UpdateItem(&dynamodb.UpdateItemInput{
+func (r *Storage) UpdateItem(pk, sk string, update expression.UpdateBuilder) error {
+	expr, err := expression.NewBuilder().WithUpdate(update).Build()
+	if err != nil {
+		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
+	}
+
+	_, err = r.Client.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName: aws.String(r.TableName),
 		Key: map[string]*dynamodb.AttributeValue{
 			"PK": {

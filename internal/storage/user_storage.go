@@ -90,12 +90,8 @@ func (u UserStorage) Update(id string, user *dto.User) error {
 	update := expression.Set(expression.Name("User"), expression.Value(user.User)).
 		Set(expression.Name("Email"), expression.Value(user.Email)).
 		Set(expression.Name("UpdatedAt"), expression.Value(u.now()))
-	expr, err := expression.NewBuilder().WithUpdate(update).Build()
-	if err != nil {
-		u.log.WithError(err).Error("error building expression")
-		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
-	}
-	return u.repo.UpdateItem(pk, sk, expr)
+
+	return u.repo.UpdateItem(pk, sk, update)
 }
 
 func (u UserStorage) Delete(id string) error {

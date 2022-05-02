@@ -13,6 +13,7 @@ import (
 )
 
 const region = "eu-west-1"
+const url = "http://localhost:4566"
 
 func createLocalTable(t *testing.T) (name string) {
 	sess, err := session.NewSession(&aws.Config{Region: aws.String(region)})
@@ -22,7 +23,7 @@ func createLocalTable(t *testing.T) (name string) {
 	}
 	name = uuid.New().String()
 	client := dynamodb.New(sess)
-	client.Endpoint = "http://localhost:4566"
+	client.Endpoint = url
 	_, err = client.CreateTable(&dynamodb.CreateTableInput{
 		AttributeDefinitions: []*dynamodb.AttributeDefinition{
 			{
@@ -89,7 +90,7 @@ func deleteLocalTable(t *testing.T, name string) {
 		return
 	}
 	client := dynamodb.New(sess)
-	client.Endpoint = "http://localhost:4566"
+	client.Endpoint = url
 	_, err = client.DeleteTable(&dynamodb.DeleteTableInput{
 		TableName: aws.String(name),
 	})
