@@ -15,6 +15,11 @@ import (
 	"github.com/esvarez/game-nest-service/service/boardgame/service"
 )
 
+const (
+	boardGameUrl = "board_game_url"
+	boardGameID  = "board_game_id"
+)
+
 type BoardGameHandler struct {
 	BoardGameService boardgame.UseCase
 	log              *logrus.Logger
@@ -26,11 +31,6 @@ func NewBoardGameHandler(s boardgame.UseCase, l *logrus.Logger) *BoardGameHandle
 		log:              l,
 	}
 }
-
-const (
-	boardGameUrl = "board_game_url"
-	boardGameID  = "board_game_id"
-)
 
 func (g *BoardGameHandler) getBoardGames() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -44,9 +44,9 @@ func (g *BoardGameHandler) getBoardGames() http.Handler {
 		response := make([]*presenter.BoardGameResponse, len(games))
 
 		for i, game := range games {
-			g := &presenter.BoardGameResponse{}
-			g.BuildResponse(game)
-			response[i] = g
+			gb := &presenter.BoardGameResponse{}
+			gb.BuildResponse(game)
+			response[i] = gb
 		}
 
 		web.Success(response, http.StatusOK).Send(w)

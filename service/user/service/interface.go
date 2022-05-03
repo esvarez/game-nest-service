@@ -24,7 +24,7 @@ type Repository interface {
 type UseCase interface {
 	Get() ([]*entity.User, error)
 	Find(id string) (*entity.User, error)
-	Create(user *dto.User) (*entity.User, error)
-	Update(id string, user *dto.User) (*entity.User, error)
+	Create(user *dto.User) error
+	Update(id string, user *dto.User) error
 	Delete(id string) error
 }

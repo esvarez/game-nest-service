@@ -45,6 +45,6 @@ type UserRecord struct {
 }
 
 type userRecordFields struct {
-	User  string `json:"user"`
-	Email string `json:"email"`
+	User  string `json:"User"`
+	Email string `json:"Email"`
 }
