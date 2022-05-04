@@ -19,6 +19,8 @@ type Record interface {
 const (
 	SKIndex  = "SKIndex"
 	UrlIndex = "UrlIndex"
+
+	conditionPKNotExist = "attribute_not_exists(PK)"
 )
 
 type Storage struct {
@@ -63,22 +65,15 @@ func (r *Storage) Query(expr expression.Expression, index string) (*dynamodb.Que
 	return result, nil
 }
 
-func (r *Storage) UpdateItem(pk, sk string, update expression.UpdateBuilder) error {
+func (r *Storage) UpdateItem(key map[string]*dynamodb.AttributeValue, update expression.UpdateBuilder) error {
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
 	if err != nil {
 		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
 	}
 
 	_, err = r.Client.UpdateItem(&dynamodb.UpdateItemInput{
-		TableName: aws.String(r.TableName),
-		Key: map[string]*dynamodb.AttributeValue{
-			"PK": {
-				S: aws.String(pk),
-			},
-			"SK": {
-				S: aws.String(sk),
-			},
-		},
+		Key:                       key,
+		TableName:                 aws.String(r.TableName),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		UpdateExpression:          expr.Update(),

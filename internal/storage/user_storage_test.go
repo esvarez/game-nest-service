@@ -84,6 +84,21 @@ func TestUser_CreateIntegration(t *testing.T) {
 	if err := us.Create(u); err != nil {
 		t.Errorf("faied to create user: %v", err)
 	}
+
+	if err := us.Create(&dto.User{
+		Email: "test@email.com",
+		User:  "user",
+	}); !errors.Is(err, errs.ErrFailTransaction) {
+		t.Errorf("expected error %v, got %v", errs.ErrFailTransaction, err)
+	}
+
+	if err := us.Create(&dto.User{
+		Email: "user@email.com",
+		User:  "test",
+	}); !errors.Is(err, errs.ErrFailTransaction) {
+		t.Errorf("expected error %v, got %v", errs.ErrFailTransaction, err)
+	}
+
 }
 
 func TestUser_UpdateIntegration(t *testing.T) {

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/sirupsen/logrus"
@@ -15,15 +17,19 @@ import (
 )
 
 type BoardGameStorage struct {
-	repo *Storage
-	log  *logrus.Logger
-	now  func() int64
+	repo      *Storage
+	client    *dynamodb.DynamoDB
+	tableName string
+	log       *logrus.Logger
+	now       func() int64
 }
 
 func NewBoardGameStorage(l *logrus.Logger, s *Storage) *BoardGameStorage {
 	return &BoardGameStorage{
-		repo: s,
-		log:  l,
+		repo:      s,
+		log:       l,
+		client:    s.Client,
+		tableName: s.TableName,
 		now: func() int64 {
 			return time.Now().Unix()
 		},
@@ -34,7 +40,39 @@ func (g *BoardGameStorage) Set(item *dto.BoardGame) error {
 	bg := storage.NewBoardGameRecord(item)
 	bg.CreatedAt = g.now()
 	bg.UpdatedAt = g.now()
-	return g.repo.PutItem(bg)
+	nc := storage.NewNameConstraint(bg)
+
+	avBG, err := dynamodbattribute.MarshalMap(bg)
+	if err != nil {
+		return fmt.Errorf("failed to marshal board game: %w", errs.ErrEntityMarshal)
+	}
+	avNC, err := dynamodbattribute.MarshalMap(nc)
+	if err != nil {
+		return fmt.Errorf("failed to marshal name constraint: %v", errs.ErrEntityMarshal)
+	}
+
+	_, err = g.client.TransactWriteItems(&dynamodb.TransactWriteItemsInput{
+		TransactItems: []*dynamodb.TransactWriteItem{
+			{
+				Put: &dynamodb.Put{
+					TableName:           aws.String(g.tableName),
+					Item:                avBG,
+					ConditionExpression: aws.String(conditionPKNotExist),
+				},
+			},
+			{
+				Put: &dynamodb.Put{
+					TableName:           aws.String(g.tableName),
+					Item:                avNC,
+					ConditionExpression: aws.String(conditionPKNotExist),
+				},
+			},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to put board game and name constraint: %w", errs.ErrFailTransaction)
+	}
+	return nil
 }
 
 func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
@@ -81,17 +119,15 @@ func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
 }
 
 func (g *BoardGameStorage) Update(id string, game *dto.BoardGame) error {
-	pk := storage.BoardGameRecordName + "#" + id
-	sk := storage.BoardGameRecordName
+	key := storage.GetBoardGameKey(id)
 
-	update := expression.Set(expression.Name("Name"), expression.Value(game.Name)).
-		Set(expression.Name("MinPlayers"), expression.Value(game.MinPlayers)).
+	update := expression.Set(expression.Name("MinPlayers"), expression.Value(game.MinPlayers)).
 		Set(expression.Name("MaxPlayers"), expression.Value(game.MaxPlayers)).
 		Set(expression.Name("Description"), expression.Value(game.Description)).
 		Set(expression.Name("Duration"), expression.Value(game.Duration)).
 		Set(expression.Name("UpdatedAt"), expression.Value(g.now()))
 
-	return g.repo.UpdateItem(pk, sk, update)
+	return g.repo.UpdateItem(key, update)
 }
 
 func (g *BoardGameStorage) Delete(id string) error {

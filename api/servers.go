@@ -2,13 +2,13 @@ package api
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
 type server struct {
@@ -30,10 +30,10 @@ func newServer(listening string, mux *mux.Router) *server {
 func (s *server) Start() {
 	go func() {
 		if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Println(err)
+			logrus.WithError(err).Error("server error")
 		}
 	}()
-	log.Printf("api is ready to handle requests: %s", s.Addr)
+	logrus.Infof("api is ready to handle requests: %s", s.Addr)
 	s.gracefulShutdown()
 }
 
@@ -42,12 +42,12 @@ func (s *server) gracefulShutdown() {
 
 	signal.Notify(quit, os.Interrupt)
 	sig := <-quit
-	log.Printf("api is shutting down %s", sig.String())
+	logrus.Infof("api is shutting down %s", sig.String())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := s.Shutdown(ctx); err != nil {
-		log.Fatalf("api could not shutdown gracefully %s", err.Error())
+		logrus.WithError(err).Fatalf("api could not shutdown gracefully %s", err.Error())
 	}
-	log.Printf("api shutdown gracefully")
+	logrus.Info("api shutdown gracefully")
 }

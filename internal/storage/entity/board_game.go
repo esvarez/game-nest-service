@@ -1,11 +1,18 @@
 package storage
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"strings"
 
 	"github.com/esvarez/game-nest-service/internal/uuid"
 	"github.com/esvarez/game-nest-service/service/boardgame/dto"
 	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+)
+
+const (
+	BoardGameRecordName = "boardGame"
+	boardGameNameField  = "boardGameName"
 )
 
 func NewBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
@@ -49,6 +56,17 @@ func newBoardGameRecordRangeKey() string {
 	return BoardGameRecordName
 }
 
+func GetBoardGameKey(id string) map[string]*dynamodb.AttributeValue {
+	return map[string]*dynamodb.AttributeValue{
+		"PK": {
+			S: aws.String(BoardGameRecordName + "#" + id),
+		},
+		"SK": {
+			S: aws.String(BoardGameRecordName),
+		},
+	}
+}
+
 type BoardGameRecord struct {
 	record
 	boardGameRecordFields
@@ -56,10 +74,25 @@ type BoardGameRecord struct {
 }
 
 type boardGameRecordFields struct {
-	Name        string `json:"Name"`
-	Url         string `json:"Url"`
-	MinPlayers  int8   `json:"minPlayers"`
-	MaxPlayers  int8   `json:"MaxPlayers"`
-	Duration    uint32 `json:"Duration"`
-	Description string `json:"Description"`
+	Name             string `json:"Name"`
+	Url              string `json:"Url"`
+	MinPlayers       int8   `json:"minPlayers"`
+	MaxPlayers       int8   `json:"MaxPlayers"`
+	Duration         uint32 `json:"Duration"`
+	MinDuration      uint32 `json:"MinDuration"`
+	MaxDuration      uint32 `json:"MaxDuration"`
+	Description      string `json:"Description"`
+	ShortDescription string `json:"ShortDescription"`
+}
+
+type NameConstraint struct {
+	Name string `json:"PK"`
+	SK   string `json:"SK"`
+}
+
+func NewNameConstraint(b BoardGameRecord) NameConstraint {
+	return NameConstraint{
+		Name: boardGameNameField + "#" + strings.ToLower(b.Name),
+		SK:   boardGameNameField,
+	}
 }

@@ -27,6 +27,19 @@ func TestStorage_SetIntegration(t *testing.T) {
 	if err := bgs.Set(bg); err != nil {
 		t.Errorf("failed to create boardgame: %v", err)
 	}
+
+	if err := bgs.Set(&dto.BoardGame{
+		Name:       "Uno",
+		MinPlayers: 1,
+		MaxPlayers: 5,
+		Duration:   120,
+	}); err != nil {
+		t.Errorf("failed to create new boardgame: %v", err)
+	}
+
+	if err := bgs.Set(bg); !errors.Is(err, errs.ErrFailTransaction) {
+		t.Errorf("expected error when trying to create a boardgame with the same name got: %v", err)
+	}
 }
 
 func TestStorage_GetAllIntegration(t *testing.T) {
@@ -171,9 +184,6 @@ func TestStorage_UpdateIntegration(t *testing.T) {
 	}
 	if game.ID != id {
 		t.Errorf("expected id %s, got %s", id, game.ID)
-	}
-	if game.Name != "Scythe" {
-		t.Errorf("expected name %s, got %s", "Scythe", game.Name)
 	}
 	if game.Duration != 120 {
 		t.Errorf("expected min players %d, got %d", 1, game.MinPlayers)

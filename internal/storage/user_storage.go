@@ -17,16 +17,22 @@ import (
 )
 
 type UserStorage struct {
-	repo *Storage
-	log  *logrus.Logger
-	now  func() int64
+	repo      *Storage
+	client    *dynamodb.DynamoDB
+	tableName string
+	log       *logrus.Logger
+	now       func() int64
 }
 
 func NewUserStorage(l *logrus.Logger, r *Storage) *UserStorage {
 	return &UserStorage{
-		repo: r,
-		log:  l,
-		now:  func() int64 { return time.Now().Unix() },
+		repo:      r,
+		log:       l,
+		client:    r.Client,
+		tableName: r.TableName,
+		now: func() int64 {
+			return time.Now().Unix()
+		},
 	}
 }
 
@@ -80,18 +86,66 @@ func (u UserStorage) Create(user *dto.User) error {
 	us := storage.NewUserRecord(user)
 	us.CreatedAt = u.now()
 	us.UpdatedAt = u.now()
-	return u.repo.PutItem(us)
+
+	usrName := storage.NewUsernameConstraint(us.User)
+	usrMail := storage.NewEmailConstraint(us.Email)
+
+	avUrs, err := dynamodbattribute.MarshalMap(us)
+	if err != nil {
+		u.log.WithError(err).Error("error marshalling user")
+		return fmt.Errorf("error marshalling user %w", err)
+	}
+	avUrsName, err := dynamodbattribute.MarshalMap(usrName)
+	if err != nil {
+		u.log.WithError(err).Error("error marshalling user name")
+		return fmt.Errorf("error marshalling user name %w", err)
+	}
+	avUsrMail, err := dynamodbattribute.MarshalMap(usrMail)
+	if err != nil {
+		u.log.WithError(err).Error("error marshalling user email")
+		return fmt.Errorf("error marshalling user email %w", err)
+	}
+
+	_, err = u.client.TransactWriteItems(&dynamodb.TransactWriteItemsInput{
+		TransactItems: []*dynamodb.TransactWriteItem{
+			{
+				Put: &dynamodb.Put{
+					TableName:           aws.String(u.tableName),
+					Item:                avUrs,
+					ConditionExpression: aws.String(conditionPKNotExist),
+				},
+			},
+			{
+				Put: &dynamodb.Put{
+					TableName:           aws.String(u.tableName),
+					Item:                avUrsName,
+					ConditionExpression: aws.String(conditionPKNotExist),
+				},
+			},
+			{
+				Put: &dynamodb.Put{
+					TableName:           aws.String(u.tableName),
+					Item:                avUsrMail,
+					ConditionExpression: aws.String(conditionPKNotExist),
+				},
+			},
+		},
+	})
+	if err != nil {
+		u.log.WithError(err).Error("error creating user")
+		return fmt.Errorf("error creating user: %w", errs.ErrFailTransaction)
+	}
+	return nil
 }
 
 func (u UserStorage) Update(id string, user *dto.User) error {
-	pk := storage.UserRecordName + "#" + id
-	sk := storage.UserRecordName
+	key := storage.GetUserKey(id)
 
 	update := expression.Set(expression.Name("User"), expression.Value(user.User)).
 		Set(expression.Name("Email"), expression.Value(user.Email)).
 		Set(expression.Name("UpdatedAt"), expression.Value(u.now()))
 
-	return u.repo.UpdateItem(pk, sk, update)
+	return u.repo.UpdateItem(key, update)
 }
 
 func (u UserStorage) Delete(id string) error {
