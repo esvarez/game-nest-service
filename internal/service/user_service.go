@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
@@ -23,11 +22,11 @@ func NewUserService(r UserRepository, l *logrus.Logger, v *validator.Validate) *
 	}
 }
 
-func (s *UserService) Get() ([]*entity.User, error) {
+func (s *UserService) Get() ([]*model.User, error) {
 	return s.repo.Get()
 }
 
-func (s *UserService) Find(id string) (*entity.User, error) {
+func (s *UserService) Find(id string) (*model.User, error) {
 	return s.repo.Find(id)
 }
 

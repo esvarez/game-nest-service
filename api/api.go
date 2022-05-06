@@ -1,6 +1,7 @@
 package api
 
 import (
+	storage2 "github.com/esvarez/game-nest-service/infrastructure/storage"
 	"github.com/esvarez/game-nest-service/internal/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
@@ -8,18 +9,17 @@ import (
 
 	"github.com/esvarez/game-nest-service/api/handler"
 	"github.com/esvarez/game-nest-service/config"
-	"github.com/esvarez/game-nest-service/pkg/storage"
 )
 
 func Start(conf *config.Configuration, log *logrus.Logger, validate *validator.Validate) {
 	var (
 		router = mux.NewRouter()
-		client = storage.NewDynamoClient(conf)
+		client = storage2.NewDynamoClient(conf)
 
-		store = storage.NewStorage(*conf.DynamoDB.Table, client)
+		store = storage2.NewStorage(*conf.DynamoDB.Table, client)
 
-		boardGameStore = storage.NewBoardGameStorage(*conf.DynamoDB.Table, log, store, client)
-		userStore      = storage.NewUserStorage(*conf.DynamoDB.Table, log, store, client)
+		boardGameStore = storage2.NewBoardGameStorage(*conf.DynamoDB.Table, log, store, client)
+		userStore      = storage2.NewUserStorage(*conf.DynamoDB.Table, log, store, client)
 
 		boardGameService = service.NewBoardGameService(boardGameStore, log, validate)
 		userService      = service.NewUserService(userStore, log, validate)

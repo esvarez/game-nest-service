@@ -2,13 +2,12 @@ package service
 
 import (
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
 )
 
 type BoardGameReader interface {
-	Find(id string) (*entity.BoardGame, error)
-	FindByUrl(url string) (*entity.BoardGame, error)
-	GetAll() ([]*entity.BoardGame, error)
+	Find(id string) (*model.BoardGame, error)
+	FindByUrl(url string) (*model.BoardGame, error)
+	GetAll() ([]*model.BoardGame, error)
 }
 
 type BoardGameWriter interface {
@@ -24,9 +23,9 @@ type BoardGameRepository interface {
 
 type BoardGameUseCase interface {
 	Save(item *dto.BoardGame) error
-	GetAll() ([]*entity.BoardGame, error)
-	Find(key string) (*entity.BoardGame, error)
-	FindGameUrl(url string) (*entity.BoardGame, error)
+	GetAll() ([]*model.BoardGame, error)
+	Find(key string) (*model.BoardGame, error)
+	FindGameUrl(url string) (*model.BoardGame, error)
 	Update(key string, value *dto.BoardGame) error
 	Delete(key string) error
 }

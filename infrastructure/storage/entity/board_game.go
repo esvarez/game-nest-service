@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/model"
 	"github.com/esvarez/game-nest-service/pkg/uuid"
 )
 
@@ -16,8 +16,8 @@ const (
 	boardGameNameField  = "boardGameName"
 )
 
-func NewBoardGameFromRecord(bg *BoardGameRecord) *entity.BoardGame {
-	return &entity.BoardGame{
+func NewBoardGameFromRecord(bg *BoardGameRecord) *model.BoardGame {
+	return &model.BoardGame{
 		ID:          bg.ID[strings.Index(bg.ID, "#")+1:],
 		Name:        bg.Name,
 		Url:         bg.Url,

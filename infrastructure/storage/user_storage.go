@@ -5,6 +5,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/esvarez/game-nest-service/infrastructure/storage/entity"
+	"github.com/esvarez/game-nest-service/internal/model"
 
 	"time"
 
@@ -12,9 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
-	storage "github.com/esvarez/game-nest-service/pkg/storage/entity"
 )
 
 type UserStorage struct {
@@ -37,7 +37,7 @@ func NewUserStorage(t string, l *logrus.Logger, r *Storage, c *dynamodb.DynamoDB
 	}
 }
 
-func (u *UserStorage) Get() ([]*entity.User, error) {
+func (u *UserStorage) Get() ([]*model.User, error) {
 	key := expression.Key("SK").Equal(expression.Value(storage.UserRecordName))
 
 	result, err := u.repo.Query(key, SKIndex)
@@ -45,7 +45,7 @@ func (u *UserStorage) Get() ([]*entity.User, error) {
 		return nil, fmt.Errorf("%v: error querying dynamo %w", err, errs.ErrDynamoDB)
 	}
 
-	games := make([]*entity.User, len(result.Items))
+	games := make([]*model.User, len(result.Items))
 	if len(games) == 0 {
 		u.log.Warn("No games found")
 		return games, nil
@@ -62,7 +62,7 @@ func (u *UserStorage) Get() ([]*entity.User, error) {
 	return games, nil
 }
 
-func (u *UserStorage) Find(id string) (*entity.User, error) {
+func (u *UserStorage) Find(id string) (*model.User, error) {
 	pk := storage.UserRecordName + "#" + id
 	sk := storage.UserRecordName
 	rec, err := getItem[storage.UserRecord](pk, sk, u.tableName, u.client)
@@ -160,7 +160,7 @@ func (u *UserStorage) AddBoardGame(userBoardGame *dto.UserBoardGame) error {
 	return u.repo.PutItem(usrBoardGame)
 }
 
-func (u *UserStorage) GetBoardGames(id string) ([]*entity.User, error) {
+func (u *UserStorage) GetBoardGames(id string) ([]*model.User, error) {
 	key := storage.GetUserGamesKey(id)
 	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
 	if err != nil {

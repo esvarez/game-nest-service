@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
 	"github.com/esvarez/game-nest-service/internal/service/mocks"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
 )
@@ -62,12 +61,12 @@ func TestService_Create(t *testing.T) {
 
 func TestService_Get(t *testing.T) {
 	tests := map[string]struct {
-		usersExpected []*entity.User
+		usersExpected []*model.User
 		expectedError error
 		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"success return users": {
-			usersExpected: []*entity.User{
+			usersExpected: []*model.User{
 				{
 					ID:    "1",
 					Email: "1@mail.com",
@@ -80,7 +79,7 @@ func TestService_Get(t *testing.T) {
 				},
 			},
 			mockSetup: func(repo *mocks.UserRepository) {
-				repo.On("Get").Return([]*entity.User{
+				repo.On("Get").Return([]*model.User{
 					{
 						ID:    "1",
 						Email: "1@mail.com",
@@ -120,18 +119,18 @@ func TestService_Get(t *testing.T) {
 func TestService_Find(t *testing.T) {
 	tests := map[string]struct {
 		id            string
-		userExpected  *entity.User
+		userExpected  *model.User
 		expectedError error
 		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"success return user": {
-			userExpected: &entity.User{
+			userExpected: &model.User{
 				ID:    "1",
 				Email: "user@mail.com",
 				User:  "user",
 			},
 			mockSetup: func(repo *mocks.UserRepository) {
-				repo.On("Find", mock.Anything).Return(&entity.User{
+				repo.On("Find", mock.Anything).Return(&model.User{
 					ID:    "1",
 					Email: "user@mail.com",
 					User:  "user",

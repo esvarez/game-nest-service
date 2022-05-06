@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	storage2 "github.com/esvarez/game-nest-service/infrastructure/storage/entity"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -9,11 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
 	errs "github.com/esvarez/game-nest-service/pkg/error"
-	storage "github.com/esvarez/game-nest-service/pkg/storage/entity"
 )
 
 type Record interface {
-	storage.BoardGameRecord | storage.UserRecord
+	storage2.BoardGameRecord | storage2.UserRecord
 }
 
 const (

@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
 	"github.com/esvarez/game-nest-service/internal/service/mocks"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
 )
@@ -62,12 +61,12 @@ func TestService_Save(t *testing.T) {
 
 func TestBoardGameService_Get(t *testing.T) {
 	tests := map[string]struct {
-		gamesExpected []*entity.BoardGame
+		gamesExpected []*model.BoardGame
 		expectedError error
 		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"returns all games": {
-			gamesExpected: []*entity.BoardGame{
+			gamesExpected: []*model.BoardGame{
 				{
 					ID:          "1",
 					Name:        "Catan",
@@ -86,7 +85,7 @@ func TestBoardGameService_Get(t *testing.T) {
 				},
 			},
 			mockSetup: func(repo *mocks.BoardGameRepository) {
-				repo.On("GetAll").Return([]*entity.BoardGame{
+				repo.On("GetAll").Return([]*model.BoardGame{
 					{
 						ID:          "1",
 						Name:        "Catan",
@@ -131,13 +130,13 @@ func TestBoardGameService_Get(t *testing.T) {
 
 func TestBoardGameService_Find(t *testing.T) {
 	tests := map[string]struct {
-		gameExpected  *entity.BoardGame
+		gameExpected  *model.BoardGame
 		expectedError error
 		partitionKey  string
 		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"returns game": {
-			gameExpected: &entity.BoardGame{
+			gameExpected: &model.BoardGame{
 				ID:          "1",
 				Name:        "Catan",
 				MinPlayers:  3,
@@ -147,7 +146,7 @@ func TestBoardGameService_Find(t *testing.T) {
 			},
 			partitionKey: "Catan",
 			mockSetup: func(repo *mocks.BoardGameRepository) {
-				repo.On("Find", mock.Anything).Return(&entity.BoardGame{
+				repo.On("Find", mock.Anything).Return(&model.BoardGame{
 					ID:          "1",
 					Name:        "Catan",
 					MinPlayers:  3,

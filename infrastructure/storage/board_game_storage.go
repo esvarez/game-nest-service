@@ -10,10 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/sirupsen/logrus"
 
+	"github.com/esvarez/game-nest-service/infrastructure/storage/entity"
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/model"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
-	"github.com/esvarez/game-nest-service/pkg/storage/entity"
 )
 
 type BoardGameStorage struct {
@@ -75,7 +75,7 @@ func (g *BoardGameStorage) Set(item *dto.BoardGame) error {
 	return nil
 }
 
-func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
+func (g *BoardGameStorage) GetAll() ([]*model.BoardGame, error) {
 	key := expression.Key("SK").Equal(expression.Value(storage.BoardGameRecordName))
 
 	result, err := g.repo.Query(key, SKIndex)
@@ -83,7 +83,7 @@ func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 		g.log.WithError(err).Error("error querying board game records")
 		return nil, fmt.Errorf("%v: error querying: %w", err, errs.ErrAWSConfig)
 	}
-	games := make([]*entity.BoardGame, len(result.Items))
+	games := make([]*model.BoardGame, len(result.Items))
 	if len(games) == 0 {
 		g.log.Warn("No games found")
 		return games, nil
@@ -100,7 +100,7 @@ func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 	return games, nil
 }
 
-func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
+func (g *BoardGameStorage) Find(id string) (*model.BoardGame, error) {
 	pk := storage.BoardGameRecordName + "#" + id
 	sk := storage.BoardGameRecordName
 
@@ -138,7 +138,7 @@ func (g *BoardGameStorage) Delete(id string) error {
 	return g.repo.DeleteItem(pk, sk, expr)
 }
 
-func (g *BoardGameStorage) FindByUrl(url string) (*entity.BoardGame, error) {
+func (g *BoardGameStorage) FindByUrl(url string) (*model.BoardGame, error) {
 	key := expression.Key("Url").Equal(expression.Value(url))
 
 	result, err := g.repo.Query(key, UrlIndex)

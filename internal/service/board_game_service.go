@@ -2,8 +2,6 @@ package service
 
 import (
 	"fmt"
-	"github.com/esvarez/game-nest-service/internal/entity"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 
@@ -35,15 +33,15 @@ func (s *BoardGameService) Save(bGame *dto.BoardGame) error {
 	return s.repo.Set(bGame)
 }
 
-func (s *BoardGameService) GetAll() ([]*entity.BoardGame, error) {
+func (s *BoardGameService) GetAll() ([]*model.BoardGame, error) {
 	return s.repo.GetAll()
 }
 
-func (s *BoardGameService) Find(pk string) (*entity.BoardGame, error) {
+func (s *BoardGameService) Find(pk string) (*model.BoardGame, error) {
 	return s.repo.Find(pk)
 }
 
-func (s *BoardGameService) FindGameUrl(url string) (*entity.BoardGame, error) {
+func (s *BoardGameService) FindGameUrl(url string) (*model.BoardGame, error) {
 	return s.repo.FindByUrl(url)
 }
 

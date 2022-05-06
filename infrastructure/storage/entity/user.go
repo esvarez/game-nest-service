@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
-	"github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/model"
 	"github.com/esvarez/game-nest-service/pkg/uuid"
 )
 
@@ -50,8 +50,8 @@ type userBoardGameRecordFields struct {
 	BoardGameID string `json:"BoardGameID"`
 }
 
-func NewUserFromRecord(r *UserRecord) *entity.User {
-	return &entity.User{
+func NewUserFromRecord(r *UserRecord) *model.User {
+	return &model.User{
 		ID:    r.ID[strings.Index(r.ID, "#")+1:],
 		Email: r.Email,
 		User:  r.User,
