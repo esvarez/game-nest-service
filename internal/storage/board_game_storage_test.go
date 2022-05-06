@@ -312,5 +312,5 @@ func getBGStorage(name string) *BoardGameStorage {
 		l      = logger.CreateLogger(conf)
 		stor   = NewStorage(*conf.DynamoDB.Table, client)
 	)
-	return NewBoardGameStorage(l, stor)
+	return NewBoardGameStorage(name, l, stor, client)
 }

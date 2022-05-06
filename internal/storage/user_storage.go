@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+
 	"time"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
@@ -24,32 +25,22 @@ type UserStorage struct {
 	now       func() int64
 }
 
-func NewUserStorage(l *logrus.Logger, r *Storage) *UserStorage {
+func NewUserStorage(t string, l *logrus.Logger, r *Storage, c *dynamodb.DynamoDB) *UserStorage {
 	return &UserStorage{
 		repo:      r,
 		log:       l,
-		client:    r.Client,
-		tableName: r.TableName,
+		client:    c,
+		tableName: t,
 		now: func() int64 {
 			return time.Now().Unix()
 		},
 	}
 }
 
-func (u UserStorage) Get() ([]*entity.User, error) {
+func (u *UserStorage) Get() ([]*entity.User, error) {
 	key := expression.Key("SK").Equal(expression.Value(storage.UserRecordName))
-	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
-	if err != nil {
-		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
-	}
 
-	result, err := u.repo.Client.Query(&dynamodb.QueryInput{
-		TableName:                 aws.String(u.repo.TableName),
-		IndexName:                 aws.String(SKIndex),
-		KeyConditionExpression:    expr.KeyCondition(),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-	})
+	result, err := u.repo.Query(key, SKIndex)
 	if err != nil {
 		return nil, fmt.Errorf("%v: error querying dynamo %w", err, errs.ErrDynamoDB)
 	}
@@ -71,10 +62,10 @@ func (u UserStorage) Get() ([]*entity.User, error) {
 	return games, nil
 }
 
-func (u UserStorage) Find(id string) (*entity.User, error) {
+func (u *UserStorage) Find(id string) (*entity.User, error) {
 	pk := storage.UserRecordName + "#" + id
 	sk := storage.UserRecordName
-	rec, err := getItem[storage.UserRecord](pk, sk, u.repo.TableName, u.repo.Client)
+	rec, err := getItem[storage.UserRecord](pk, sk, u.tableName, u.client)
 	if err != nil {
 		u.log.WithError(err).Error("error getting user")
 		return nil, fmt.Errorf("error getting user %w", err)
@@ -82,7 +73,7 @@ func (u UserStorage) Find(id string) (*entity.User, error) {
 	return storage.NewUserFromRecord(rec), nil
 }
 
-func (u UserStorage) Create(user *dto.User) error {
+func (u *UserStorage) Create(user *dto.User) error {
 	us := storage.NewUserRecord(user)
 	us.CreatedAt = u.now()
 	us.UpdatedAt = u.now()
@@ -138,7 +129,7 @@ func (u UserStorage) Create(user *dto.User) error {
 	return nil
 }
 
-func (u UserStorage) Update(id string, user *dto.User) error {
+func (u *UserStorage) Update(id string, user *dto.User) error {
 	key := storage.GetUserKey(id)
 
 	update := expression.Set(expression.Name("User"), expression.Value(user.User)).
@@ -148,7 +139,7 @@ func (u UserStorage) Update(id string, user *dto.User) error {
 	return u.repo.UpdateItem(key, update)
 }
 
-func (u UserStorage) Delete(id string) error {
+func (u *UserStorage) Delete(id string) error {
 	pk := storage.UserRecordName + "#" + id
 	sk := storage.UserRecordName
 	f := expression.Name("PK").Equal(expression.Value(pk)).
@@ -159,4 +150,33 @@ func (u UserStorage) Delete(id string) error {
 		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
 	}
 	return u.repo.DeleteItem(pk, sk, expr)
+}
+
+func (u *UserStorage) AddBoardGame(userBoardGame *dto.UserBoardGame) error {
+	usrBoardGame := storage.NewUserBoardGameRecord(userBoardGame)
+	usrBoardGame.CreatedAt = u.now()
+	usrBoardGame.UpdatedAt = u.now()
+
+	return u.repo.PutItem(usrBoardGame)
+}
+
+func (u *UserStorage) GetBoardGames(id string) ([]*entity.UserDetails, error) {
+	key := storage.GetUserGamesKey(id)
+	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
+	if err != nil {
+		u.log.WithError(err).Error("error building expression")
+		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
+	}
+
+	_, err = u.client.Query(&dynamodb.QueryInput{
+		TableName:                 aws.String(u.tableName),
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("%v: error querying dynamo %w", err, errs.ErrDynamoDB)
+	}
+
+	return nil, nil
 }

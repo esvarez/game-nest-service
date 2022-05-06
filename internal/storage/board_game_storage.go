@@ -24,12 +24,12 @@ type BoardGameStorage struct {
 	now       func() int64
 }
 
-func NewBoardGameStorage(l *logrus.Logger, s *Storage) *BoardGameStorage {
+func NewBoardGameStorage(t string, l *logrus.Logger, s *Storage, c *dynamodb.DynamoDB) *BoardGameStorage {
 	return &BoardGameStorage{
 		repo:      s,
 		log:       l,
-		client:    s.Client,
-		tableName: s.TableName,
+		client:    c,
+		tableName: t,
 		now: func() int64 {
 			return time.Now().Unix()
 		},
@@ -78,13 +78,7 @@ func (g *BoardGameStorage) Set(item *dto.BoardGame) error {
 func (g *BoardGameStorage) GetAll() ([]*entity.BoardGame, error) {
 	key := expression.Key("SK").Equal(expression.Value(storage.BoardGameRecordName))
 
-	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
-	if err != nil {
-		g.log.WithError(err).Error("error building expression")
-		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
-	}
-
-	result, err := g.repo.Query(expr, SKIndex)
+	result, err := g.repo.Query(key, SKIndex)
 	if err != nil {
 		g.log.WithError(err).Error("error querying board game records")
 		return nil, fmt.Errorf("%v: error querying: %w", err, errs.ErrAWSConfig)
@@ -110,7 +104,7 @@ func (g *BoardGameStorage) Find(id string) (*entity.BoardGame, error) {
 	pk := storage.BoardGameRecordName + "#" + id
 	sk := storage.BoardGameRecordName
 
-	record, err := getItem[storage.BoardGameRecord](pk, sk, g.repo.TableName, g.repo.Client)
+	record, err := getItem[storage.BoardGameRecord](pk, sk, g.tableName, g.client)
 	if err != nil {
 		g.log.WithError(err).Error("error board game")
 		return nil, fmt.Errorf("error getting board game: %w", err)
@@ -145,16 +139,9 @@ func (g *BoardGameStorage) Delete(id string) error {
 }
 
 func (g *BoardGameStorage) FindByUrl(url string) (*entity.BoardGame, error) {
-
 	key := expression.Key("Url").Equal(expression.Value(url))
 
-	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
-	if err != nil {
-		g.log.WithError(err).Error("error building expression")
-		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
-	}
-
-	result, err := g.repo.Query(expr, UrlIndex)
+	result, err := g.repo.Query(key, UrlIndex)
 	if err != nil {
 		g.log.WithError(err).Error("error getting board game")
 		return nil, fmt.Errorf("%v: error getting board game %w", err, errs.ErrAWSConfig)

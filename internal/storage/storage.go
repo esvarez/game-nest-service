@@ -24,14 +24,14 @@ const (
 )
 
 type Storage struct {
-	TableName string
-	Client    *dynamodb.DynamoDB
+	tableName string
+	client    *dynamodb.DynamoDB
 }
 
 func NewStorage(tableName string, client *dynamodb.DynamoDB) *Storage {
 	return &Storage{
-		TableName: tableName,
-		Client:    client,
+		tableName: tableName,
+		client:    client,
 	}
 }
 
@@ -41,9 +41,9 @@ func (r *Storage) PutItem(item any) error {
 		return fmt.Errorf("%v: error marshalling game entity %w", err, errs.ErrEntityMarshal)
 	}
 
-	_, err = r.Client.PutItem(&dynamodb.PutItemInput{
+	_, err = r.client.PutItem(&dynamodb.PutItemInput{
 		Item:      av,
-		TableName: aws.String(r.TableName),
+		TableName: aws.String(r.tableName),
 	})
 	if err != nil {
 		return fmt.Errorf("%v: error putting item %w", err, errs.ErrDynamoDB)
@@ -51,9 +51,13 @@ func (r *Storage) PutItem(item any) error {
 	return nil
 }
 
-func (r *Storage) Query(expr expression.Expression, index string) (*dynamodb.QueryOutput, error) {
-	result, err := r.Client.Query(&dynamodb.QueryInput{
-		TableName:                 aws.String(r.TableName),
+func (r *Storage) Query(key expression.KeyConditionBuilder, index string) (*dynamodb.QueryOutput, error) {
+	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
+	if err != nil {
+		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
+	}
+	result, err := r.client.Query(&dynamodb.QueryInput{
+		TableName:                 aws.String(r.tableName),
 		IndexName:                 aws.String(index),
 		KeyConditionExpression:    expr.KeyCondition(),
 		ExpressionAttributeNames:  expr.Names(),
@@ -71,9 +75,9 @@ func (r *Storage) UpdateItem(key map[string]*dynamodb.AttributeValue, update exp
 		return fmt.Errorf("%v: error building expression %w", err, errs.ErrAWSConfig)
 	}
 
-	_, err = r.Client.UpdateItem(&dynamodb.UpdateItemInput{
+	_, err = r.client.UpdateItem(&dynamodb.UpdateItemInput{
 		Key:                       key,
-		TableName:                 aws.String(r.TableName),
+		TableName:                 aws.String(r.tableName),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		UpdateExpression:          expr.Update(),
@@ -85,8 +89,8 @@ func (r *Storage) UpdateItem(key map[string]*dynamodb.AttributeValue, update exp
 }
 
 func (r *Storage) DeleteItem(pk, sk string, expr expression.Expression) error {
-	_, err := r.Client.DeleteItem(&dynamodb.DeleteItemInput{
-		TableName:                 aws.String(r.TableName),
+	_, err := r.client.DeleteItem(&dynamodb.DeleteItemInput{
+		TableName:                 aws.String(r.tableName),
 		ConditionExpression:       expr.Condition(),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
