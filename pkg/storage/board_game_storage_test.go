@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/esvarez/game-nest-service/config"
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/internal/logger"
-	"github.com/esvarez/game-nest-service/service/boardgame/dto"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	"github.com/esvarez/game-nest-service/pkg/logger"
 )
 
 func TestStorage_SetIntegration(t *testing.T) {

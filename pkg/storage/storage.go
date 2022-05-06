@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	storage "github.com/esvarez/game-nest-service/internal/storage/entity"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	storage "github.com/esvarez/game-nest-service/pkg/storage/entity"
 )
 
 type Record interface {

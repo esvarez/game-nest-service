@@ -1,31 +1,31 @@
-package boardgame
+package service
 
 import (
 	"fmt"
+	"github.com/esvarez/game-nest-service/internal/entity"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/service/boardgame/dto"
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
 )
 
-type Service struct {
-	repo      Repository
+type BoardGameService struct {
+	repo      BoardGameRepository
 	log       *logrus.Logger
 	validator *validator.Validate
 }
 
-func NewService(r Repository, l *logrus.Logger, v *validator.Validate) *Service {
-	return &Service{
+func NewBoardGameService(r BoardGameRepository, l *logrus.Logger, v *validator.Validate) *BoardGameService {
+	return &BoardGameService{
 		repo:      r,
 		log:       l,
 		validator: v,
 	}
 }
 
-func (s *Service) Save(bGame *dto.BoardGame) error {
+func (s *BoardGameService) Save(bGame *dto.BoardGame) error {
 	log := s.log.WithField("method", "[boardgame] Save")
 	if err := s.validator.Struct(bGame); err != nil {
 		log.WithError(err).Error("validation error")
@@ -35,19 +35,19 @@ func (s *Service) Save(bGame *dto.BoardGame) error {
 	return s.repo.Set(bGame)
 }
 
-func (s *Service) GetAll() ([]*entity.BoardGame, error) {
+func (s *BoardGameService) GetAll() ([]*entity.BoardGame, error) {
 	return s.repo.GetAll()
 }
 
-func (s *Service) Find(pk string) (*entity.BoardGame, error) {
+func (s *BoardGameService) Find(pk string) (*entity.BoardGame, error) {
 	return s.repo.Find(pk)
 }
 
-func (s *Service) FindGameUrl(url string) (*entity.BoardGame, error) {
+func (s *BoardGameService) FindGameUrl(url string) (*entity.BoardGame, error) {
 	return s.repo.FindByUrl(url)
 }
 
-func (s *Service) Update(id string, data *dto.BoardGame) error {
+func (s *BoardGameService) Update(id string, data *dto.BoardGame) error {
 	log := s.log.WithField("method", "[boardgame] Update")
 	if err := s.validator.Struct(data); err != nil {
 		log.WithError(err).Error("validation error")
@@ -56,6 +56,6 @@ func (s *Service) Update(id string, data *dto.BoardGame) error {
 	return s.repo.Update(id, data)
 }
 
-func (s *Service) Delete(id string) error {
+func (s *BoardGameService) Delete(id string) error {
 	return s.repo.Delete(id)
 }

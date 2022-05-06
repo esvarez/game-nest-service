@@ -1,13 +1,14 @@
 package storage
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"strings"
 
-	"github.com/esvarez/game-nest-service/internal/uuid"
-	"github.com/esvarez/game-nest-service/service/boardgame/dto"
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+
+	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/pkg/uuid"
 )
 
 const (

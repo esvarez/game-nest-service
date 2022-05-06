@@ -1,15 +1,14 @@
 package api
 
 import (
-	user "github.com/esvarez/game-nest-service/service/user/service"
+	"github.com/esvarez/game-nest-service/internal/service"
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
 	"github.com/esvarez/game-nest-service/api/handler"
 	"github.com/esvarez/game-nest-service/config"
-	"github.com/esvarez/game-nest-service/internal/storage"
-	"github.com/esvarez/game-nest-service/service/boardgame/service"
+	"github.com/esvarez/game-nest-service/pkg/storage"
 )
 
 func Start(conf *config.Configuration, log *logrus.Logger, validate *validator.Validate) {
@@ -19,11 +18,11 @@ func Start(conf *config.Configuration, log *logrus.Logger, validate *validator.V
 
 		store = storage.NewStorage(*conf.DynamoDB.Table, client)
 
-		boardGameStore = storage.NewBoardGameStorage(log, store)
-		userStore      = storage.NewUserStorage(log, store)
+		boardGameStore = storage.NewBoardGameStorage(*conf.DynamoDB.Table, log, store, client)
+		userStore      = storage.NewUserStorage(*conf.DynamoDB.Table, log, store, client)
 
-		boardGameService = boardgame.NewService(boardGameStore, log, validate)
-		userService      = user.NewService(userStore, log, validate)
+		boardGameService = service.NewBoardGameService(boardGameStore, log, validate)
+		userService      = service.NewUserService(userStore, log, validate)
 
 		gameHandler = handler.NewBoardGameHandler(boardGameService, log)
 		userHandler = handler.NewUserHandler(userService, log)

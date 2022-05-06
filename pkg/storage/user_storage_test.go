@@ -2,11 +2,12 @@ package storage
 
 import (
 	"errors"
-	"github.com/esvarez/game-nest-service/config"
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/internal/logger"
-	"github.com/esvarez/game-nest-service/service/user/dto"
 	"testing"
+
+	"github.com/esvarez/game-nest-service/config"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	"github.com/esvarez/game-nest-service/pkg/logger"
 )
 
 func TestUser_GetAllIntegration(t *testing.T) {

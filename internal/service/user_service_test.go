@@ -1,4 +1,4 @@
-package user
+package service
 
 import (
 	"testing"
@@ -8,26 +8,26 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/service/user/dto"
-	"github.com/esvarez/game-nest-service/service/user/entity"
-	"github.com/esvarez/game-nest-service/service/user/service/mocks"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/service/mocks"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
 )
 
-//go:generate mockery --name Repository --dir ./service/user/service --outpkg mocks --output ./service/user/service/mocks --case=underscore
+//go:generate mockery --name UserRepository --dir ./internal/service --outpkg mocks --output ./internal/service/mocks --case=underscore
 
 func TestService_Create(t *testing.T) {
 	tests := map[string]struct {
 		data          *dto.User
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"success": {
 			data: &dto.User{
 				Email: "mail",
 				User:  "user",
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.UserRepository) {
 				repo.On("Create", mock.Anything).Return(nil)
 			},
 		},
@@ -43,10 +43,10 @@ func TestService_Create(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.UserRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewUserService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -64,7 +64,7 @@ func TestService_Get(t *testing.T) {
 	tests := map[string]struct {
 		usersExpected []*entity.User
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"success return users": {
 			usersExpected: []*entity.User{
@@ -79,7 +79,7 @@ func TestService_Get(t *testing.T) {
 					User:  "otherUser",
 				},
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.UserRepository) {
 				repo.On("Get").Return([]*entity.User{
 					{
 						ID:    "1",
@@ -99,10 +99,10 @@ func TestService_Get(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.UserRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewUserService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -122,7 +122,7 @@ func TestService_Find(t *testing.T) {
 		id            string
 		userExpected  *entity.User
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"success return user": {
 			userExpected: &entity.User{
@@ -130,7 +130,7 @@ func TestService_Find(t *testing.T) {
 				Email: "user@mail.com",
 				User:  "user",
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.UserRepository) {
 				repo.On("Find", mock.Anything).Return(&entity.User{
 					ID:    "1",
 					Email: "user@mail.com",
@@ -141,7 +141,7 @@ func TestService_Find(t *testing.T) {
 		"user not found": {
 			expectedError: errs.ErrItemNotFound,
 			id:            "123",
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.UserRepository) {
 				repo.On("Find", mock.Anything).Return(nil, errs.ErrItemNotFound)
 			},
 		},
@@ -150,10 +150,10 @@ func TestService_Find(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.UserRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewUserService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -173,7 +173,7 @@ func TestService_Update(t *testing.T) {
 		data          *dto.User
 		id            string
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"should return validation error": {
 			data: &dto.User{
@@ -187,7 +187,7 @@ func TestService_Update(t *testing.T) {
 				Email: "user@mail.com",
 				User:  "user",
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.UserRepository) {
 				repo.On("Update", mock.Anything, mock.Anything).Return(nil)
 			},
 		},
@@ -196,10 +196,10 @@ func TestService_Update(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.UserRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewUserService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -217,11 +217,11 @@ func TestService_Delete(t *testing.T) {
 	tests := map[string]struct {
 		id            string
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.UserRepository)
 	}{
 		"shoud delete user": {
 			id: "1",
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.UserRepository) {
 				repo.On("Delete", mock.Anything).Return(nil)
 			},
 		},
@@ -230,10 +230,10 @@ func TestService_Delete(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.UserRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewUserService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 

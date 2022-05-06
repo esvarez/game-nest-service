@@ -1,4 +1,4 @@
-package boardgame
+package service
 
 import (
 	"testing"
@@ -8,19 +8,19 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/service/boardgame/dto"
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
-	"github.com/esvarez/game-nest-service/service/boardgame/service/mocks"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/entity"
+	"github.com/esvarez/game-nest-service/internal/service/mocks"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
 )
 
-//go:generate mockery --name Repository --dir ./service/boardgame/service --outpkg mocks --output ./service/boardgame/service/mocks --case=underscore
+//go:generate mockery --name BoardGameRepository --dir ./internal/service --outpkg mocks --output ./internal/service/mocks --case=underscore
 
 func TestService_Save(t *testing.T) {
 	tests := map[string]struct {
 		data          *dto.BoardGame
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"should save board game": {
 			data: &dto.BoardGame{
@@ -30,7 +30,7 @@ func TestService_Save(t *testing.T) {
 				Description: "",
 				Duration:    120,
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.BoardGameRepository) {
 				repo.On("Set", mock.Anything).Return(nil)
 			},
 		},
@@ -43,10 +43,10 @@ func TestService_Save(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.BoardGameRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewBoardGameService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -60,11 +60,11 @@ func TestService_Save(t *testing.T) {
 	}
 }
 
-func TestService_Get(t *testing.T) {
+func TestBoardGameService_Get(t *testing.T) {
 	tests := map[string]struct {
 		gamesExpected []*entity.BoardGame
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"returns all games": {
 			gamesExpected: []*entity.BoardGame{
@@ -85,7 +85,7 @@ func TestService_Get(t *testing.T) {
 					Duration:    120,
 				},
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.BoardGameRepository) {
 				repo.On("GetAll").Return([]*entity.BoardGame{
 					{
 						ID:          "1",
@@ -111,10 +111,10 @@ func TestService_Get(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.BoardGameRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewBoardGameService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -129,12 +129,12 @@ func TestService_Get(t *testing.T) {
 	}
 }
 
-func TestService_Find(t *testing.T) {
+func TestBoardGameService_Find(t *testing.T) {
 	tests := map[string]struct {
 		gameExpected  *entity.BoardGame
 		expectedError error
 		partitionKey  string
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"returns game": {
 			gameExpected: &entity.BoardGame{
@@ -146,7 +146,7 @@ func TestService_Find(t *testing.T) {
 				Duration:    120,
 			},
 			partitionKey: "Catan",
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.BoardGameRepository) {
 				repo.On("Find", mock.Anything).Return(&entity.BoardGame{
 					ID:          "1",
 					Name:        "Catan",
@@ -160,7 +160,7 @@ func TestService_Find(t *testing.T) {
 		"game not found": {
 			expectedError: errs.ErrItemNotFound,
 			partitionKey:  "not a game",
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.BoardGameRepository) {
 				repo.On("Find", mock.Anything).Return(nil, errs.ErrItemNotFound)
 			},
 		},
@@ -169,10 +169,10 @@ func TestService_Find(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.BoardGameRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewBoardGameService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -187,12 +187,12 @@ func TestService_Find(t *testing.T) {
 	}
 }
 
-func TestService_Update(t *testing.T) {
+func TestBoardGameService_Update(t *testing.T) {
 	tests := map[string]struct {
 		data          *dto.BoardGame
 		id            string
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"should return invalid validation": {
 			data: &dto.BoardGame{
@@ -211,7 +211,7 @@ func TestService_Update(t *testing.T) {
 				Description: "",
 				Duration:    120,
 			},
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.BoardGameRepository) {
 				repo.On("Update", mock.Anything, mock.Anything).Return(nil)
 			},
 		},
@@ -220,10 +220,10 @@ func TestService_Update(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.BoardGameRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewBoardGameService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 
@@ -237,15 +237,15 @@ func TestService_Update(t *testing.T) {
 	}
 }
 
-func TestService_Delete(t *testing.T) {
+func TestBoardGameService_Delete(t *testing.T) {
 	tests := map[string]struct {
 		id            string
 		expectedError error
-		mockSetup     func(repo *mocks.Repository)
+		mockSetup     func(repo *mocks.BoardGameRepository)
 	}{
 		"should delete board game": {
 			id: "1",
-			mockSetup: func(repo *mocks.Repository) {
+			mockSetup: func(repo *mocks.BoardGameRepository) {
 				repo.On("Delete", mock.Anything).Return(nil)
 			},
 		},
@@ -254,10 +254,10 @@ func TestService_Delete(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			var (
-				repo = &mocks.Repository{}
+				repo = &mocks.BoardGameRepository{}
 				l    = logrus.New()
 				v    = validator.New()
-				svc  = NewService(repo, l, v)
+				svc  = NewBoardGameService(repo, l, v)
 			)
 			l.SetLevel(logrus.DebugLevel)
 

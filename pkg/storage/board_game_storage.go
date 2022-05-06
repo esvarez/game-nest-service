@@ -10,10 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/sirupsen/logrus"
 
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/internal/storage/entity"
-	"github.com/esvarez/game-nest-service/service/boardgame/dto"
-	"github.com/esvarez/game-nest-service/service/boardgame/entity"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/entity"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	"github.com/esvarez/game-nest-service/pkg/storage/entity"
 )
 
 type BoardGameStorage struct {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/esvarez/game-nest-service/api"
 	"github.com/esvarez/game-nest-service/config"
-	"github.com/esvarez/game-nest-service/internal/logger"
+	"github.com/esvarez/game-nest-service/pkg/logger"
 )
 
 func main() {

@@ -11,10 +11,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 	"github.com/sirupsen/logrus"
 
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	storage "github.com/esvarez/game-nest-service/internal/storage/entity"
-	"github.com/esvarez/game-nest-service/service/user/dto"
-	"github.com/esvarez/game-nest-service/service/user/entity"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/entity"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	storage "github.com/esvarez/game-nest-service/pkg/storage/entity"
 )
 
 type UserStorage struct {
@@ -160,7 +160,7 @@ func (u *UserStorage) AddBoardGame(userBoardGame *dto.UserBoardGame) error {
 	return u.repo.PutItem(usrBoardGame)
 }
 
-func (u *UserStorage) GetBoardGames(id string) ([]*entity.UserDetails, error) {
+func (u *UserStorage) GetBoardGames(id string) ([]*entity.User, error) {
 	key := storage.GetUserGamesKey(id)
 	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
 	if err != nil {
