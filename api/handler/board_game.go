@@ -93,6 +93,8 @@ func (g *BoardGameHandler) createBoardGame() http.Handler {
 			switch {
 			case errors.Is(err, errs.ErrInvalidEntity):
 				status = web.InvalidBody(err)
+			case errors.Is(err, errs.ErrFailTransaction):
+				status = web.ErrInvalidRequest
 			default:
 				status = web.ErrInternalServer
 			}
@@ -137,7 +139,7 @@ func (g *BoardGameHandler) updateBoardGame() http.Handler {
 }
 
 func MakeGameHandler(router *mux.Router, handler *BoardGameHandler) {
-	router = router.PathPrefix("/game").Subrouter()
+	router = router.PathPrefix("/boardgame").Subrouter()
 
 	router.Handle("", handler.getBoardGames()).
 		Methods("GET")

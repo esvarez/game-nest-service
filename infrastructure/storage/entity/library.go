@@ -21,7 +21,7 @@ func NewLibraryRecord(userBoardGame *dto.Library) *LibraryRecord {
 	return &LibraryRecord{
 		record: record{
 			ID:         newLibraryRecordHashKey(userBoardGame.UserID),
-			SK:         newLibraryRecordRangeKey(userBoardGame.BoardGameID),
+			SK:         newLibraryRecordRangeKey(userBoardGame.BoardGameName),
 			RecordType: UserBoardGameRecordName,
 			Version:    0,
 		},
