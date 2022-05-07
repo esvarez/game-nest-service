@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/model"
 )
 
 type BoardGameReader interface {

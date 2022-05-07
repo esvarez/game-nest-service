@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/model"
 	"github.com/esvarez/game-nest-service/internal/service/mocks"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
 )

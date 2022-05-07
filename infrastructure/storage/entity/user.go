@@ -5,8 +5,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
-
 	"github.com/esvarez/game-nest-service/internal/dto"
 	"github.com/esvarez/game-nest-service/internal/model"
 	"github.com/esvarez/game-nest-service/pkg/uuid"
@@ -38,16 +36,6 @@ type UsernameConstraint struct {
 type EmailConstraint struct {
 	Email string `json:"PK"`
 	SK    string `json:"SK"`
-}
-
-type UserBoardGameRecord struct {
-	record
-	userBoardGameRecordFields
-	audit
-}
-
-type userBoardGameRecordFields struct {
-	BoardGameID string `json:"BoardGameID"`
 }
 
 func NewUserFromRecord(r *UserRecord) *model.User {
@@ -84,31 +72,12 @@ func GetUserKey(id string) map[string]*dynamodb.AttributeValue {
 	}
 }
 
-func GetUserGamesKey(id string) expression.KeyConditionBuilder {
-	return expression.Key("PK").Equal(expression.Value(UserRecordName + "#" + id)).
-		And(expression.Key("SK").BeginsWith(boardGameNameField))
-}
-
 func newUserRecordHashKey() string {
 	return UserRecordName + "#" + uuid.NewID().String()
 }
 
 func newUSerRecordRangeKey() string {
 	return UserRecordName
-}
-
-func NewUserBoardGameRecord(userBoardGame *dto.UserBoardGame) *UserBoardGameRecord {
-	return &UserBoardGameRecord{
-		record: record{
-			ID:         UserBoardGameRecordName + "#" + userBoardGame.UserID,
-			SK:         boardGameNameField + "#" + userBoardGame.BoardGameName,
-			RecordType: UserBoardGameRecordName,
-			Version:    0,
-		},
-		userBoardGameRecordFields: userBoardGameRecordFields{
-			BoardGameID: userBoardGame.BoardGameID,
-		},
-	}
 }
 
 func NewUsernameConstraint(username string) *UsernameConstraint {

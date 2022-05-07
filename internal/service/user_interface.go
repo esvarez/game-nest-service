@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/model"
 )
 
 type UserReader interface {
@@ -20,7 +21,7 @@ type UserRepository interface {
 	UserWriter
 }
 
-type UseCase interface {
+type UserUseCase interface {
 	Get() ([]*model.User, error)
 	Find(id string) (*model.User, error)
 	Create(user *dto.User) error

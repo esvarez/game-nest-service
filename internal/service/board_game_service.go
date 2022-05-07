@@ -2,10 +2,12 @@ package service
 
 import (
 	"fmt"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 
 	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/model"
 	errs "github.com/esvarez/game-nest-service/pkg/error"
 )
 

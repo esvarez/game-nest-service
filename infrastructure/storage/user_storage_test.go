@@ -179,57 +179,6 @@ func TestUser_DeleteIntegration(t *testing.T) {
 	}
 }
 
-func TestUser_AddBoardGame(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration test")
-	}
-	name := createLocalTable(t)
-	defer deleteLocalTable(t, name)
-	us := getUserStorage(name)
-
-	if err := us.AddBoardGame(&dto.UserBoardGame{
-		UserID:        "123",
-		BoardGameID:   "321",
-		BoardGameName: "Catan",
-	}); err != nil {
-		t.Errorf("failed to create user board game record: %v", err)
-	}
-}
-
-func TestUser_GetAllBoardgames(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping integration tests")
-	}
-
-	name := createLocalTable(t)
-	defer deleteLocalTable(t, name)
-	us := getUserStorage(name)
-
-	if err := us.AddBoardGame(&dto.UserBoardGame{
-		UserID:        "123",
-		BoardGameID:   "321",
-		BoardGameName: "Catan",
-	}); err != nil {
-		t.Errorf("failed to create user board game record: %v", err)
-	}
-
-	if err := us.AddBoardGame(&dto.UserBoardGame{
-		UserID:        "123",
-		BoardGameID:   "234",
-		BoardGameName: "Cubitos",
-	}); err != nil {
-		t.Errorf("failed to create user board game record: %v", err)
-	}
-
-	userBoardGames, err := us.GetBoardGames("123")
-	if err != nil {
-		t.Errorf("failed to get user board games: %v", err)
-	}
-	if len(userBoardGames) != 2 {
-		t.Errorf("expected 2 boardgames got %d", len(userBoardGames))
-	}
-}
-
 func getUserStorage(table string) *UserStorage {
 	var (
 		ep   = "http://localhost:4566"

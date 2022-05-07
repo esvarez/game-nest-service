@@ -9,14 +9,14 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/esvarez/game-nest-service/api/presenter"
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/internal/web"
-	"github.com/esvarez/game-nest-service/service/user/dto"
-	"github.com/esvarez/game-nest-service/service/user/service"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	"github.com/esvarez/game-nest-service/internal/service"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	"github.com/esvarez/game-nest-service/pkg/web"
 )
 
 type UserHandler struct {
-	userService user.UseCase
+	userService service.UserUseCase
 	log         *logrus.Logger
 }
 
@@ -24,7 +24,7 @@ const (
 	userID = "user_id"
 )
 
-func NewUserHandler(u user.UseCase, l *logrus.Logger) *UserHandler {
+func NewUserHandler(u service.UserUseCase, l *logrus.Logger) *UserHandler {
 	return &UserHandler{
 		userService: u,
 		log:         l,

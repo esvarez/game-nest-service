@@ -1,6 +1,6 @@
 package presenter
 
-import "github.com/esvarez/game-nest-service/service/user/entity"
+import "github.com/esvarez/game-nest-service/internal/model"
 
 type UserResponse struct {
 	ID       string `json:"id"`
@@ -8,7 +8,7 @@ type UserResponse struct {
 	Email    string `json:"email"`
 }
 
-func BuildUserResponse(us *entity.User) *UserResponse {
+func BuildUserResponse(us *model.User) *UserResponse {
 	return &UserResponse{
 		ID:       us.ID,
 		Username: us.User,

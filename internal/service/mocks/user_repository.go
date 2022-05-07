@@ -4,7 +4,7 @@ package mocks
 
 import (
 	dto "github.com/esvarez/game-nest-service/internal/dto"
-	entity "github.com/esvarez/game-nest-service/internal/entity"
+	entity "github.com/esvarez/game-nest-service/internal/model"
 
 	mock "github.com/stretchr/testify/mock"
 

@@ -15,6 +15,10 @@ import (
 const region = "eu-west-1"
 const url = "http://localhost:4566"
 
+type dynamoStorage interface {
+	BoardGameStorage | UserStorage | LibraryStorage
+}
+
 func createLocalTable(t *testing.T) (name string) {
 	sess, err := session.NewSession(&aws.Config{Region: aws.String(region)})
 	if err != nil {

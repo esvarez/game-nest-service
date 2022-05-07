@@ -1,5 +1,7 @@
 package presenter
 
+import "github.com/esvarez/game-nest-service/internal/model"
+
 type BoardGameResponse struct {
 	ID          string `json:"id"`
 	Name        string `json:"name"`

@@ -151,32 +151,3 @@ func (u *UserStorage) Delete(id string) error {
 	}
 	return u.repo.DeleteItem(pk, sk, expr)
 }
-
-func (u *UserStorage) AddBoardGame(userBoardGame *dto.UserBoardGame) error {
-	usrBoardGame := storage.NewUserBoardGameRecord(userBoardGame)
-	usrBoardGame.CreatedAt = u.now()
-	usrBoardGame.UpdatedAt = u.now()
-
-	return u.repo.PutItem(usrBoardGame)
-}
-
-func (u *UserStorage) GetBoardGames(id string) ([]*model.User, error) {
-	key := storage.GetUserGamesKey(id)
-	expr, err := expression.NewBuilder().WithKeyCondition(key).Build()
-	if err != nil {
-		u.log.WithError(err).Error("error building expression")
-		return nil, fmt.Errorf("%v: error building expression: %w", err, errs.ErrAWSConfig)
-	}
-
-	_, err = u.client.Query(&dynamodb.QueryInput{
-		TableName:                 aws.String(u.tableName),
-		KeyConditionExpression:    expr.KeyCondition(),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-	})
-	if err != nil {
-		return nil, fmt.Errorf("%v: error querying dynamo %w", err, errs.ErrDynamoDB)
-	}
-
-	return nil, nil
-}

@@ -3,16 +3,16 @@ package handler
 import (
 	"encoding/json"
 	"errors"
+	"github.com/esvarez/game-nest-service/internal/service"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
 	"github.com/esvarez/game-nest-service/api/presenter"
-	errs "github.com/esvarez/game-nest-service/internal/error"
-	"github.com/esvarez/game-nest-service/internal/web"
-	"github.com/esvarez/game-nest-service/service/boardgame/dto"
-	"github.com/esvarez/game-nest-service/service/boardgame/service"
+	"github.com/esvarez/game-nest-service/internal/dto"
+	errs "github.com/esvarez/game-nest-service/pkg/error"
+	"github.com/esvarez/game-nest-service/pkg/web"
 )
 
 const (
@@ -21,11 +21,11 @@ const (
 )
 
 type BoardGameHandler struct {
-	BoardGameService boardgame.UseCase
+	BoardGameService service.BoardGameUseCase
 	log              *logrus.Logger
 }
 
-func NewBoardGameHandler(s boardgame.UseCase, l *logrus.Logger) *BoardGameHandler {
+func NewBoardGameHandler(s service.BoardGameUseCase, l *logrus.Logger) *BoardGameHandler {
 	return &BoardGameHandler{
 		BoardGameService: s,
 		log:              l,

@@ -5,3 +5,8 @@ type User struct {
 	Email string
 	User  string
 }
+
+type UserInfo struct {
+	User
+	BoardGames []*BoardGame
+}
